@@ -1,0 +1,2243 @@
+diff --git a/android_webview/DEPS b/android_webview/DEPS
+index fe7f839..7b82634 100644
+--- a/android_webview/DEPS
++++ b/android_webview/DEPS
+@@ -17,5 +17,6 @@ include_rules = [
+   "+third_party/skia/include",
+   "+ui/android",
+   "+ui/base",
++  "+ui/gfx",
+   "+webkit",
+ ]
+diff --git a/android_webview/common/print_messages.h b/android_webview/common/print_messages.h
+index 32d5790..6da90de 100644
+--- a/android_webview/common/print_messages.h
++++ b/android_webview/common/print_messages.h
+@@ -16,6 +16,7 @@
+ #include "printing/page_size_margins.h"
+ #include "printing/print_job_constants.h"
+ #include "third_party/WebKit/public/web/WebPrintScalingOption.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/native_widget_types.h"
+ #include "ui/gfx/rect.h"
+ 
+diff --git a/chrome/chrome_common.gypi b/chrome/chrome_common.gypi
+index fb1aee2..2f54dcd 100644
+--- a/chrome/chrome_common.gypi
++++ b/chrome/chrome_common.gypi
+@@ -314,6 +314,7 @@
+         '<(DEPTH)/third_party/libxml/libxml.gyp:libxml',
+         '<(DEPTH)/third_party/sqlite/sqlite.gyp:sqlite',
+         '<(DEPTH)/third_party/zlib/google/zip.gyp:zip',
++        '<(DEPTH)/ui/gfx/ipc/gfx_ipc.gyp:gfx_ipc',
+         '<(DEPTH)/ui/resources/ui_resources.gyp:ui_resources',
+         '<(DEPTH)/url/url.gyp:url_lib',
+       ],
+diff --git a/chrome/common/chrome_utility_messages.h b/chrome/common/chrome_utility_messages.h
+index 66e19b4..37bea80 100644
+--- a/chrome/common/chrome_utility_messages.h
++++ b/chrome/common/chrome_utility_messages.h
+@@ -22,6 +22,7 @@
+ #include "ipc/ipc_message_macros.h"
+ #include "ipc/ipc_platform_file.h"
+ #include "third_party/skia/include/core/SkBitmap.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ 
+ #define IPC_MESSAGE_START ChromeUtilityMsgStart
+ 
+diff --git a/chrome/common/print_messages.h b/chrome/common/print_messages.h
+index cfeb66d..709be0e 100644
+--- a/chrome/common/print_messages.h
++++ b/chrome/common/print_messages.h
+@@ -14,6 +14,7 @@
+ #include "printing/page_size_margins.h"
+ #include "printing/print_job_constants.h"
+ #include "third_party/WebKit/public/web/WebPrintScalingOption.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/native_widget_types.h"
+ #include "ui/gfx/rect.h"
+ 
+diff --git a/chrome/common/render_messages.h b/chrome/common/render_messages.h
+index 76133a8..26799f0 100644
+--- a/chrome/common/render_messages.h
++++ b/chrome/common/render_messages.h
+@@ -32,10 +32,11 @@
+ #include "ipc/ipc_channel_handle.h"
+ #include "ipc/ipc_message_macros.h"
+ #include "ipc/ipc_platform_file.h"
+-#include "third_party/skia/include/core/SkBitmap.h"
+ #include "third_party/WebKit/public/web/WebCache.h"
+ #include "third_party/WebKit/public/web/WebConsoleMessage.h"
++#include "third_party/skia/include/core/SkBitmap.h"
+ #include "ui/base/window_open_disposition.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/rect.h"
+ 
+ // Singly-included section for enums and custom IPC traits.
+diff --git a/components/autofill.gypi b/components/autofill.gypi
+index b2abb11..eac417e 100644
+--- a/components/autofill.gypi
++++ b/components/autofill.gypi
+@@ -284,6 +284,7 @@
+             '../ipc/ipc.gyp:ipc',
+             '../third_party/WebKit/public/blink.gyp:blink_minimal',
+             '../ui/gfx/gfx.gyp:gfx',
++            '../ui/gfx/ipc/gfx_ipc.gyp:gfx_ipc',
+           ],
+           'include_dirs': [
+             '..',
+diff --git a/components/autofill/content/common/autofill_messages.h b/components/autofill/content/common/autofill_messages.h
+index 4eff7e9..c95a6c4 100644
+--- a/components/autofill/content/common/autofill_messages.h
++++ b/components/autofill/content/common/autofill_messages.h
+@@ -22,6 +22,7 @@
+ #include "ipc/ipc_message_macros.h"
+ #include "ipc/ipc_message_utils.h"
+ #include "third_party/WebKit/public/web/WebFormElement.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/rect.h"
+ #include "url/gurl.h"
+ 
+diff --git a/content/child/plugin_messages.h b/content/child/plugin_messages.h
+index b71441e..2e17c98 100644
+--- a/content/child/plugin_messages.h
++++ b/content/child/plugin_messages.h
+@@ -12,6 +12,7 @@
+ #include "content/public/common/common_param_traits.h"
+ #include "ipc/ipc_channel_handle.h"
+ #include "ipc/ipc_message_macros.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/native_widget_types.h"
+ #include "ui/gfx/rect.h"
+ 
+diff --git a/content/common/browser_plugin/browser_plugin_messages.h b/content/common/browser_plugin/browser_plugin_messages.h
+index 74cb01d..8b92d36 100644
+--- a/content/common/browser_plugin/browser_plugin_messages.h
++++ b/content/common/browser_plugin/browser_plugin_messages.h
+@@ -23,6 +23,7 @@
+ #include "third_party/WebKit/public/web/WebDragOperation.h"
+ #include "third_party/WebKit/public/web/WebDragStatus.h"
+ #include "third_party/skia/include/core/SkBitmap.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/point.h"
+ #include "ui/gfx/rect.h"
+ #include "ui/gfx/size.h"
+diff --git a/content/common/cc_messages.h b/content/common/cc_messages.h
+index da416eb..23714b4 100644
+--- a/content/common/cc_messages.h
++++ b/content/common/cc_messages.h
+@@ -29,6 +29,7 @@
+ #include "content/common/content_export.h"
+ #include "gpu/ipc/gpu_command_buffer_traits.h"
+ #include "ipc/ipc_message_macros.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ 
+ #ifndef CONTENT_COMMON_CC_MESSAGES_H_
+ #define CONTENT_COMMON_CC_MESSAGES_H_
+diff --git a/content/common/common_param_traits_unittest.cc b/content/common/common_param_traits_unittest.cc
+index 9566950..080e1cf 100644
+--- a/content/common/common_param_traits_unittest.cc
++++ b/content/common/common_param_traits_unittest.cc
+@@ -15,6 +15,7 @@
+ #include "printing/page_range.h"
+ #include "testing/gtest/include/gtest/gtest.h"
+ #include "third_party/skia/include/core/SkBitmap.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/rect.h"
+ #include "url/gurl.h"
+ 
+diff --git a/content/common/frame_messages.h b/content/common/frame_messages.h
+index ee1326c..5e0e6c0 100644
+--- a/content/common/frame_messages.h
++++ b/content/common/frame_messages.h
+@@ -17,6 +17,7 @@
+ #include "content/public/common/javascript_message_type.h"
+ #include "content/public/common/page_state.h"
+ #include "ipc/ipc_message_macros.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "url/gurl.h"
+ 
+ #undef IPC_MESSAGE_EXPORT
+diff --git a/content/common/frame_param_macros.h b/content/common/frame_param_macros.h
+index 023cfd6..32be0ad 100644
+--- a/content/common/frame_param_macros.h
++++ b/content/common/frame_param_macros.h
+@@ -13,10 +13,11 @@
+ #ifndef CONTENT_COMMON_FRAME_PARAM_MACROS_H_
+ #define CONTENT_COMMON_FRAME_PARAM_MACROS_H_
+ 
+-#include "cc/output/compositor_frame_ack.h"
+ #include "cc/output/compositor_frame.h"
++#include "cc/output/compositor_frame_ack.h"
+ #include "content/public/common/common_param_traits.h"
+ #include "ipc/ipc_message_macros.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ 
+ #undef IPC_MESSAGE_EXPORT
+ #define IPC_MESSAGE_EXPORT CONTENT_EXPORT
+diff --git a/content/common/input_messages.h b/content/common/input_messages.h
+index 6b36bec..b84cfeb 100644
+--- a/content/common/input_messages.h
++++ b/content/common/input_messages.h
+@@ -19,11 +19,12 @@
+ #include "content/common/input/synthetic_pinch_gesture_params.h"
+ #include "content/common/input/synthetic_smooth_scroll_gesture_params.h"
+ #include "content/common/input/synthetic_tap_gesture_params.h"
+-#include "content/public/common/common_param_traits.h"
+ #include "content/common/input/touch_action.h"
++#include "content/public/common/common_param_traits.h"
+ #include "ipc/ipc_message_macros.h"
+ #include "third_party/WebKit/public/web/WebInputEvent.h"
+ #include "ui/events/ipc/latency_info_param_traits.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/point.h"
+ #include "ui/gfx/rect.h"
+ #include "ui/gfx/vector2d_f.h"
+diff --git a/content/common/plugin_process_messages.h b/content/common/plugin_process_messages.h
+index 5eb7544..9cb5e2c 100644
+--- a/content/common/plugin_process_messages.h
++++ b/content/common/plugin_process_messages.h
+@@ -10,6 +10,7 @@
+ #include "content/public/common/common_param_traits.h"
+ #include "ipc/ipc_channel_handle.h"
+ #include "ipc/ipc_message_macros.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/native_widget_types.h"
+ #include "ui/gfx/rect.h"
+ 
+diff --git a/content/common/view_messages.h b/content/common/view_messages.h
+index 2a95e3f..02d33e3 100644
+--- a/content/common/view_messages.h
++++ b/content/common/view_messages.h
+@@ -14,6 +14,7 @@
+ #include "content/common/content_export.h"
+ #include "content/common/content_param_traits.h"
+ #include "content/common/cookie_data.h"
++#include "content/common/date_time_suggestion.h"
+ #include "content/common/navigation_gesture.h"
+ #include "content/common/pepper_renderer_instance_data.h"
+ #include "content/common/view_message_enums.h"
+@@ -29,7 +30,6 @@
+ #include "content/public/common/stop_find_action.h"
+ #include "content/public/common/three_d_api_types.h"
+ #include "content/public/common/window_container_type.h"
+-#include "content/common/date_time_suggestion.h"
+ #include "ipc/ipc_channel_handle.h"
+ #include "ipc/ipc_message_macros.h"
+ #include "ipc/ipc_platform_file.h"
+@@ -49,6 +49,7 @@
+ #include "ui/base/ime/text_input_mode.h"
+ #include "ui/base/ime/text_input_type.h"
+ #include "ui/base/ui_base_types.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "ui/gfx/point.h"
+ #include "ui/gfx/range/range.h"
+ #include "ui/gfx/rect.h"
+diff --git a/content/content_common.gypi b/content/content_common.gypi
+index 2ae3c11..1823a84 100644
+--- a/content/content_common.gypi
++++ b/content/content_common.gypi
+@@ -17,6 +17,7 @@
+     '../ui/events/ipc/events_ipc.gyp:events_ipc',
+     '../ui/gfx/gfx.gyp:gfx',
+     '../ui/gfx/gfx.gyp:gfx_geometry',
++    '../ui/gfx/ipc/gfx_ipc.gyp:gfx_ipc',
+     '../ui/shell_dialogs/shell_dialogs.gyp:shell_dialogs',
+     '../url/url.gyp:url_lib',
+   ],
+diff --git a/content/content_shell.gypi b/content/content_shell.gypi
+index e9f641d..1cf8355 100644
+--- a/content/content_shell.gypi
++++ b/content/content_shell.gypi
+@@ -57,6 +57,7 @@
+         '../ui/events/events.gyp:events_base',
+         '../ui/gfx/gfx.gyp:gfx',
+         '../ui/gfx/gfx.gyp:gfx_geometry',
++        '../ui/gfx/ipc/gfx_ipc.gyp:gfx_ipc',
+         '../ui/gl/gl.gyp:gl',
+         '../url/url.gyp:url_lib',
+         '../v8/tools/gyp/v8.gyp:v8',
+diff --git a/content/content_tests.gypi b/content/content_tests.gypi
+index bb754ae..f7a9fe8 100644
+--- a/content/content_tests.gypi
++++ b/content/content_tests.gypi
+@@ -363,6 +363,7 @@
+         '../ui/base/ui_base.gyp:ui_base',
+         '../ui/gfx/gfx.gyp:gfx',
+         '../ui/gfx/gfx.gyp:gfx_geometry',
++        '../ui/gfx/ipc/gfx_ipc.gyp:gfx_ipc',
+       ],
+       'include_dirs': [
+         '..',
+diff --git a/content/public/common/common_param_traits.cc b/content/public/common/common_param_traits.cc
+index 956801a..f4f9a08 100644
+--- a/content/public/common/common_param_traits.cc
++++ b/content/public/common/common_param_traits.cc
+@@ -12,44 +12,6 @@
+ #include "content/public/common/url_utils.h"
+ #include "net/base/host_port_pair.h"
+ #include "net/base/ip_endpoint.h"
+-#include "third_party/skia/include/core/SkBitmap.h"
+-#include "ui/gfx/rect.h"
+-#include "ui/gfx/rect_f.h"
+-
+-namespace {
+-
+-struct SkBitmap_Data {
+-  // The configuration for the bitmap (bits per pixel, etc).
+-  SkBitmap::Config fConfig;
+-
+-  // The width of the bitmap in pixels.
+-  uint32 fWidth;
+-
+-  // The height of the bitmap in pixels.
+-  uint32 fHeight;
+-
+-  void InitSkBitmapDataForTransfer(const SkBitmap& bitmap) {
+-    fConfig = bitmap.config();
+-    fWidth = bitmap.width();
+-    fHeight = bitmap.height();
+-  }
+-
+-  // Returns whether |bitmap| successfully initialized.
+-  bool InitSkBitmapFromData(SkBitmap* bitmap, const char* pixels,
+-                            size_t total_pixels) const {
+-    if (total_pixels) {
+-      bitmap->setConfig(fConfig, fWidth, fHeight, 0);
+-      if (!bitmap->allocPixels())
+-        return false;
+-      if (total_pixels != bitmap->getSize())
+-        return false;
+-      memcpy(bitmap->getPixels(), pixels, total_pixels);
+-    }
+-    return true;
+-  }
+-};
+-
+-}  // namespace
+ 
+ namespace IPC {
+ 
+@@ -177,220 +139,6 @@ void ParamTraits<content::PageState>::Log(
+   l->append(")");
+ }
+ 
+-void ParamTraits<gfx::Point>::Write(Message* m, const gfx::Point& p) {
+-  m->WriteInt(p.x());
+-  m->WriteInt(p.y());
+-}
+-
+-bool ParamTraits<gfx::Point>::Read(const Message* m, PickleIterator* iter,
+-                                   gfx::Point* r) {
+-  int x, y;
+-  if (!m->ReadInt(iter, &x) ||
+-      !m->ReadInt(iter, &y))
+-    return false;
+-  r->set_x(x);
+-  r->set_y(y);
+-  return true;
+-}
+-
+-void ParamTraits<gfx::Point>::Log(const gfx::Point& p, std::string* l) {
+-  l->append(base::StringPrintf("(%d, %d)", p.x(), p.y()));
+-}
+-
+-void ParamTraits<gfx::PointF>::Write(Message* m, const gfx::PointF& v) {
+-  ParamTraits<float>::Write(m, v.x());
+-  ParamTraits<float>::Write(m, v.y());
+-}
+-
+-bool ParamTraits<gfx::PointF>::Read(const Message* m,
+-                                      PickleIterator* iter,
+-                                      gfx::PointF* r) {
+-  float x, y;
+-  if (!ParamTraits<float>::Read(m, iter, &x) ||
+-      !ParamTraits<float>::Read(m, iter, &y))
+-    return false;
+-  r->set_x(x);
+-  r->set_y(y);
+-  return true;
+-}
+-
+-void ParamTraits<gfx::PointF>::Log(const gfx::PointF& v, std::string* l) {
+-  l->append(base::StringPrintf("(%f, %f)", v.x(), v.y()));
+-}
+-
+-void ParamTraits<gfx::Size>::Write(Message* m, const gfx::Size& p) {
+-  DCHECK_GE(p.width(), 0);
+-  DCHECK_GE(p.height(), 0);
+-  int values[2] = { p.width(), p.height() };
+-  m->WriteBytes(&values, sizeof(int) * 2);
+-}
+-
+-bool ParamTraits<gfx::Size>::Read(const Message* m,
+-                                  PickleIterator* iter,
+-                                  gfx::Size* r) {
+-  const char* char_values;
+-  if (!m->ReadBytes(iter, &char_values, sizeof(int) * 2))
+-    return false;
+-  const int* values = reinterpret_cast<const int*>(char_values);
+-  if (values[0] < 0 || values[1] < 0)
+-    return false;
+-  r->set_width(values[0]);
+-  r->set_height(values[1]);
+-  return true;
+-}
+-
+-void ParamTraits<gfx::Size>::Log(const gfx::Size& p, std::string* l) {
+-  l->append(base::StringPrintf("(%d, %d)", p.width(), p.height()));
+-}
+-
+-void ParamTraits<gfx::SizeF>::Write(Message* m, const gfx::SizeF& p) {
+-  float values[2] = { p.width(), p.height() };
+-  m->WriteBytes(&values, sizeof(float) * 2);
+-}
+-
+-bool ParamTraits<gfx::SizeF>::Read(const Message* m,
+-                                   PickleIterator* iter,
+-                                   gfx::SizeF* r) {
+-  const char* char_values;
+-  if (!m->ReadBytes(iter, &char_values, sizeof(float) * 2))
+-    return false;
+-  const float* values = reinterpret_cast<const float*>(char_values);
+-  r->set_width(values[0]);
+-  r->set_height(values[1]);
+-  return true;
+-}
+-
+-void ParamTraits<gfx::SizeF>::Log(const gfx::SizeF& p, std::string* l) {
+-  l->append(base::StringPrintf("(%f, %f)", p.width(), p.height()));
+-}
+-
+-void ParamTraits<gfx::Vector2d>::Write(Message* m, const gfx::Vector2d& p) {
+-  int values[2] = { p.x(), p.y() };
+-  m->WriteBytes(&values, sizeof(int) * 2);
+-}
+-
+-bool ParamTraits<gfx::Vector2d>::Read(const Message* m,
+-                                      PickleIterator* iter,
+-                                      gfx::Vector2d* r) {
+-  const char* char_values;
+-  if (!m->ReadBytes(iter, &char_values, sizeof(int) * 2))
+-    return false;
+-  const int* values = reinterpret_cast<const int*>(char_values);
+-  r->set_x(values[0]);
+-  r->set_y(values[1]);
+-  return true;
+-}
+-
+-void ParamTraits<gfx::Vector2d>::Log(const gfx::Vector2d& v, std::string* l) {
+-  l->append(base::StringPrintf("(%d, %d)", v.x(), v.y()));
+-}
+-
+-void ParamTraits<gfx::Vector2dF>::Write(Message* m, const gfx::Vector2dF& p) {
+-  float values[2] = { p.x(), p.y() };
+-  m->WriteBytes(&values, sizeof(float) * 2);
+-}
+-
+-bool ParamTraits<gfx::Vector2dF>::Read(const Message* m,
+-                                      PickleIterator* iter,
+-                                      gfx::Vector2dF* r) {
+-  const char* char_values;
+-  if (!m->ReadBytes(iter, &char_values, sizeof(float) * 2))
+-    return false;
+-  const float* values = reinterpret_cast<const float*>(char_values);
+-  r->set_x(values[0]);
+-  r->set_y(values[1]);
+-  return true;
+-}
+-
+-void ParamTraits<gfx::Vector2dF>::Log(const gfx::Vector2dF& v, std::string* l) {
+-  l->append(base::StringPrintf("(%f, %f)", v.x(), v.y()));
+-}
+-
+-void ParamTraits<gfx::Rect>::Write(Message* m, const gfx::Rect& p) {
+-  int values[4] = { p.x(), p.y(), p.width(), p.height() };
+-  m->WriteBytes(&values, sizeof(int) * 4);
+-}
+-
+-bool ParamTraits<gfx::Rect>::Read(const Message* m,
+-                                  PickleIterator* iter,
+-                                  gfx::Rect* r) {
+-  const char* char_values;
+-  if (!m->ReadBytes(iter, &char_values, sizeof(int) * 4))
+-    return false;
+-  const int* values = reinterpret_cast<const int*>(char_values);
+-  if (values[2] < 0 || values[3] < 0)
+-    return false;
+-  r->SetRect(values[0], values[1], values[2], values[3]);
+-  return true;
+-}
+-
+-void ParamTraits<gfx::Rect>::Log(const gfx::Rect& p, std::string* l) {
+-  l->append(base::StringPrintf("(%d, %d, %d, %d)", p.x(), p.y(),
+-                               p.width(), p.height()));
+-}
+-
+-void ParamTraits<gfx::RectF>::Write(Message* m, const gfx::RectF& p) {
+-  float values[4] = { p.x(), p.y(), p.width(), p.height() };
+-  m->WriteBytes(&values, sizeof(float) * 4);
+-}
+-
+-bool ParamTraits<gfx::RectF>::Read(const Message* m,
+-                                   PickleIterator* iter,
+-                                   gfx::RectF* r) {
+-  const char* char_values;
+-  if (!m->ReadBytes(iter, &char_values, sizeof(float) * 4))
+-    return false;
+-  const float* values = reinterpret_cast<const float*>(char_values);
+-  r->SetRect(values[0], values[1], values[2], values[3]);
+-  return true;
+-}
+-
+-void ParamTraits<gfx::RectF>::Log(const gfx::RectF& p, std::string* l) {
+-  l->append(base::StringPrintf("(%f, %f, %f, %f)", p.x(), p.y(),
+-                               p.width(), p.height()));
+-}
+-
+-void ParamTraits<SkBitmap>::Write(Message* m, const SkBitmap& p) {
+-  size_t fixed_size = sizeof(SkBitmap_Data);
+-  SkBitmap_Data bmp_data;
+-  bmp_data.InitSkBitmapDataForTransfer(p);
+-  m->WriteData(reinterpret_cast<const char*>(&bmp_data),
+-               static_cast<int>(fixed_size));
+-  size_t pixel_size = p.getSize();
+-  SkAutoLockPixels p_lock(p);
+-  m->WriteData(reinterpret_cast<const char*>(p.getPixels()),
+-               static_cast<int>(pixel_size));
+-}
+-
+-bool ParamTraits<SkBitmap>::Read(const Message* m,
+-                                 PickleIterator* iter,
+-                                 SkBitmap* r) {
+-  const char* fixed_data;
+-  int fixed_data_size = 0;
+-  if (!m->ReadData(iter, &fixed_data, &fixed_data_size) ||
+-     (fixed_data_size <= 0)) {
+-    NOTREACHED();
+-    return false;
+-  }
+-  if (fixed_data_size != sizeof(SkBitmap_Data))
+-    return false;  // Message is malformed.
+-
+-  const char* variable_data;
+-  int variable_data_size = 0;
+-  if (!m->ReadData(iter, &variable_data, &variable_data_size) ||
+-     (variable_data_size < 0)) {
+-    NOTREACHED();
+-    return false;
+-  }
+-  const SkBitmap_Data* bmp_data =
+-      reinterpret_cast<const SkBitmap_Data*>(fixed_data);
+-  return bmp_data->InitSkBitmapFromData(r, variable_data, variable_data_size);
+-}
+-
+-void ParamTraits<SkBitmap>::Log(const SkBitmap& p, std::string* l) {
+-  l->append("<SkBitmap>");
+-}
+-
+ }  // namespace IPC
+ 
+ // Generate param traits write methods.
+diff --git a/content/public/common/common_param_traits.h b/content/public/common/common_param_traits.h
+index f527f16..657ef64 100644
+--- a/content/public/common/common_param_traits.h
++++ b/content/public/common/common_param_traits.h
+@@ -25,20 +25,10 @@
+ #include "url/gurl.h"
+ #include "url/origin.h"
+ 
+-class SkBitmap;
+-
+ namespace content {
+ class PageState;
+ }
+ 
+-namespace gfx {
+-class Point;
+-class Rect;
+-class RectF;
+-class Size;
+-class Vector2d;
+-}  // namespace gfx
+-
+ namespace net {
+ class HostPortPair;
+ class IPEndPoint;
+@@ -87,70 +77,6 @@ struct CONTENT_EXPORT ParamTraits<content::PageState> {
+ };
+ 
+ template <>
+-struct CONTENT_EXPORT ParamTraits<gfx::Point> {
+-  typedef gfx::Point param_type;
+-  static void Write(Message* m, const param_type& p);
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+-template <>
+-struct CONTENT_EXPORT ParamTraits<gfx::PointF> {
+-  typedef gfx::PointF param_type;
+-  static void Write(Message* m, const param_type& p);
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+-template <>
+-struct CONTENT_EXPORT ParamTraits<gfx::Size> {
+-  typedef gfx::Size param_type;
+-  static void Write(Message* m, const param_type& p);
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+-template <>
+-struct CONTENT_EXPORT ParamTraits<gfx::SizeF> {
+-  typedef gfx::SizeF param_type;
+-  static void Write(Message* m, const param_type& p);
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+-template <>
+-struct CONTENT_EXPORT ParamTraits<gfx::Vector2d> {
+-  typedef gfx::Vector2d param_type;
+-  static void Write(Message* m, const param_type& p);
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+-template <>
+-struct CONTENT_EXPORT ParamTraits<gfx::Vector2dF> {
+-  typedef gfx::Vector2dF param_type;
+-  static void Write(Message* m, const param_type& p);
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+-template <>
+-struct CONTENT_EXPORT ParamTraits<gfx::Rect> {
+-  typedef gfx::Rect param_type;
+-  static void Write(Message* m, const param_type& p);
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+-template <>
+-struct CONTENT_EXPORT ParamTraits<gfx::RectF> {
+-  typedef gfx::RectF param_type;
+-  static void Write(Message* m, const param_type& p);
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+-template <>
+ struct ParamTraits<gfx::NativeWindow> {
+   typedef gfx::NativeWindow param_type;
+   static void Write(Message* m, const param_type& p) {
+@@ -204,18 +130,6 @@ struct ParamTraits<TransportDIB::Id> {
+ };
+ #endif
+ 
+-template <>
+-struct CONTENT_EXPORT ParamTraits<SkBitmap> {
+-  typedef SkBitmap param_type;
+-  static void Write(Message* m, const param_type& p);
+-
+-  // Note: This function expects parameter |r| to be of type &SkBitmap since
+-  // r->SetConfig() and r->SetPixels() are called.
+-  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
+-
+-  static void Log(const param_type& p, std::string* l);
+-};
+-
+ }  // namespace IPC
+ 
+ #endif  // CONTENT_PUBLIC_COMMON_COMMON_PARAM_TRAITS_H_
+diff --git a/content/shell/common/shell_messages.h b/content/shell/common/shell_messages.h
+index 077099a..cdef18a2 100644
+--- a/content/shell/common/shell_messages.h
++++ b/content/shell/common/shell_messages.h
+@@ -13,6 +13,7 @@
+ #include "ipc/ipc_message_macros.h"
+ #include "ipc/ipc_platform_file.h"
+ #include "third_party/skia/include/core/SkBitmap.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ 
+ #define IPC_MESSAGE_START ShellMsgStart
+ 
+diff --git a/extensions/common/extension_messages.h b/extensions/common/extension_messages.h
+index edf49a4..fb706a7 100644
+--- a/extensions/common/extension_messages.h
++++ b/extensions/common/extension_messages.h
+@@ -24,6 +24,7 @@
+ #include "extensions/common/url_pattern_set.h"
+ #include "extensions/common/view_type.h"
+ #include "ipc/ipc_message_macros.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ #include "url/gurl.h"
+ 
+ #define IPC_MESSAGE_START ExtensionMsgStart
+diff --git a/extensions/extensions.gyp b/extensions/extensions.gyp
+index 9d195fa..d8f5220 100644
+--- a/extensions/extensions.gyp
++++ b/extensions/extensions.gyp
+@@ -23,6 +23,7 @@
+         '../third_party/re2/re2.gyp:re2',
+         '../ui/base/ui_base.gyp:ui_base',
+         '../ui/gfx/gfx.gyp:gfx_geometry',
++        '../ui/gfx/ipc/gfx_ipc.gyp:gfx_ipc',
+         '../url/url.gyp:url_lib',
+         'common/api/api.gyp:extensions_api',
+         'extensions_strings.gyp:extensions_strings',
+diff --git a/extensions/renderer/set_icon_natives.cc b/extensions/renderer/set_icon_natives.cc
+index c9a222f..2ef12dc 100644
+--- a/extensions/renderer/set_icon_natives.cc
++++ b/extensions/renderer/set_icon_natives.cc
+@@ -12,6 +12,7 @@
+ #include "extensions/renderer/script_context.h"
+ #include "ipc/ipc_message_utils.h"
+ #include "third_party/skia/include/core/SkBitmap.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
+ 
+ namespace {
+ 
+diff --git a/ipc/ipc_message_start.h b/ipc/ipc_message_start.h
+index 8d813a2..136ea47 100644
+--- a/ipc/ipc_message_start.h
++++ b/ipc/ipc_message_start.h
+@@ -107,6 +107,7 @@ enum IPCMessageStart {
+   BatteryStatusMsgStart,
+   UtilityPrintingMsgStart,
+   AecDumpMsgStart,
++  OzoneGpuMsgStart,
+   LastIPCMsgStart  // Must come last.
+ };
+ 
+diff --git a/ui/events/ozone/evdev/event_factory_evdev.cc b/ui/events/ozone/evdev/event_factory_evdev.cc
+index 216488e..c09e118 100644
+--- a/ui/events/ozone/evdev/event_factory_evdev.cc
++++ b/ui/events/ozone/evdev/event_factory_evdev.cc
+@@ -16,6 +16,7 @@
+ #include "ui/events/ozone/evdev/cursor_delegate_evdev.h"
+ #include "ui/events/ozone/evdev/event_device_info.h"
+ #include "ui/events/ozone/evdev/key_event_converter_evdev.h"
++#include "ui/events/ozone/evdev/mouse_event_converter_evdev.h"
+ #include "ui/events/ozone/evdev/touch_event_converter_evdev.h"
+ 
+ #if defined(USE_EVDEV_GESTURES)
+@@ -71,6 +72,10 @@ scoped_ptr<EventConverterEvdev> CreateConverter(
+     return make_scoped_ptr<EventConverterEvdev>(
+         new TouchEventConverterEvdev(fd, path, devinfo, dispatch));
+ 
++  if (devinfo.HasRelXY())
++    return make_scoped_ptr<EventConverterEvdev>(
++        new MouseEventConverterEvdev(fd, path, cursor, dispatch));
++
+   // Everything else: use KeyEventConverterEvdev.
+   return make_scoped_ptr<EventConverterEvdev>(
+       new KeyEventConverterEvdev(fd, path, modifiers, dispatch));
+diff --git a/ui/events/ozone/evdev/mouse_event_converter_evdev.cc b/ui/events/ozone/evdev/mouse_event_converter_evdev.cc
+new file mode 100644
+index 0000000..24d6892
+--- /dev/null
++++ b/ui/events/ozone/evdev/mouse_event_converter_evdev.cc
+@@ -0,0 +1,115 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Copyright 2014 Intel Corporation
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "ui/events/ozone/evdev/mouse_event_converter_evdev.h"
++
++#include <errno.h>
++#include <linux/input.h>
++
++#include "base/message_loop/message_loop.h"
++#include "ui/events/event.h"
++#include "ui/ozone/public/event_factory_ozone.h"
++
++namespace ui {
++
++MouseEventConverterEvdev::MouseEventConverterEvdev(
++    int fd,
++    base::FilePath path,
++    CursorDelegateEvdev *cursor,
++    const EventDispatchCallback& callback)
++    : EventConverterEvdev(callback),
++      fd_(fd),
++      path_(path),
++      cursor_(cursor) {
++}
++
++MouseEventConverterEvdev::~MouseEventConverterEvdev() {
++  Stop();
++  close(fd_);
++}
++
++void MouseEventConverterEvdev::Start() {
++  base::MessageLoopForUI::current()->WatchFileDescriptor(
++      fd_, true, base::MessagePumpLibevent::WATCH_READ, &controller_, this);
++}
++
++void MouseEventConverterEvdev::Stop() {
++  controller_.StopWatchingFileDescriptor();
++}
++
++void MouseEventConverterEvdev::OnFileCanReadWithoutBlocking(int fd) {
++  input_event inputs[4];
++  ssize_t read_size = read(fd, inputs, sizeof(inputs));
++  if (read_size < 0) {
++    if (errno == EINTR || errno == EAGAIN)
++      return;
++    if (errno != ENODEV)
++      PLOG(ERROR) << "error reading device " << path_.value();
++    Stop();
++    return;
++  }
++
++  CHECK_EQ(read_size % sizeof(*inputs), 0u);
++  ProcessEvents(inputs, read_size / sizeof(*inputs));
++}
++
++void MouseEventConverterEvdev::OnFileCanWriteWithoutBlocking(int fd) {
++  NOTREACHED();
++}
++
++void MouseEventConverterEvdev::ProcessEvents(const input_event* inputs,
++                                           int count) {
++  for (int i = 0; i < count; ++i) {
++    const input_event& input = inputs[i];
++    if (input.type == EV_REL)
++      ConvertMouseMoveEvent(input);
++    else if (input.type == EV_KEY)
++      ConvertMouseButtonEvent(input);
++  }
++}
++
++void MouseEventConverterEvdev::ConvertMouseMoveEvent(const input_event& input) {
++  int x = 0, y = 0;
++
++  if (input.code == REL_X)
++    x = input.value;
++  else if (input.code == REL_Y)
++    y = input.value;
++  else
++    return;
++
++  cursor_->MoveCursor(gfx::Vector2dF(x, y));
++
++  MouseEvent mouse_event(ui::ET_MOUSE_MOVED,
++                         cursor_->location(), cursor_->location(), 0, 0);
++  DispatchEventToCallback(&mouse_event);
++}
++
++void MouseEventConverterEvdev::ConvertMouseButtonEvent(const input_event& input) {
++  ui::EventType type;
++  ui::EventFlags flags;
++
++  if (input.code == BTN_LEFT)
++    flags = ui::EF_LEFT_MOUSE_BUTTON;
++  else if (input.code == BTN_RIGHT)
++    flags = ui::EF_RIGHT_MOUSE_BUTTON;
++  else if (input.code == BTN_MIDDLE)
++    flags = ui::EF_MIDDLE_MOUSE_BUTTON;
++  else
++    return;
++
++  if (input.value == 1)
++    type = ui::ET_MOUSE_PRESSED;
++  else if (input.value == 0)
++    type = ui::ET_MOUSE_RELEASED;
++  else
++    return;
++
++  MouseEvent mouse_event(type, cursor_->location(), cursor_->location(),
++                         flags, flags);
++  DispatchEventToCallback(&mouse_event);
++}
++
++}  // namespace ui
+diff --git a/ui/events/ozone/evdev/mouse_event_converter_evdev.h b/ui/events/ozone/evdev/mouse_event_converter_evdev.h
+new file mode 100644
+index 0000000..c77f643
+--- /dev/null
++++ b/ui/events/ozone/evdev/mouse_event_converter_evdev.h
+@@ -0,0 +1,60 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Copyright 2014 Intel Corporation
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef UI_EVENTS_OZONE_EVDEV_MOUSE_EVENT_CONVERTER_EVDEV_H_
++#define UI_EVENTS_OZONE_EVDEV_MOUSE_EVENT_CONVERTER_EVDEV_H_
++
++#include "base/files/file_path.h"
++#include "base/message_loop/message_pump_libevent.h"
++#include "ui/events/event.h"
++#include "ui/events/ozone/evdev/event_converter_evdev.h"
++#include "ui/events/ozone/evdev/events_ozone_evdev_export.h"
++#include "ui/events/ozone/evdev/cursor_delegate_evdev.h"
++
++struct input_event;
++
++namespace ui {
++
++class EVENTS_OZONE_EVDEV_EXPORT MouseEventConverterEvdev
++    : public EventConverterEvdev,
++      public base::MessagePumpLibevent::Watcher {
++ public:
++  MouseEventConverterEvdev(int fd,
++                           base::FilePath path,
++                           CursorDelegateEvdev *cursor,
++                           const EventDispatchCallback& dispatch);
++  virtual ~MouseEventConverterEvdev();
++
++  // Start & stop watching for events.
++  virtual void Start() OVERRIDE;
++  virtual void Stop() OVERRIDE;
++
++  // Overidden from base::MessagePumpLibevent::Watcher.
++  virtual void OnFileCanReadWithoutBlocking(int fd) OVERRIDE;
++  virtual void OnFileCanWriteWithoutBlocking(int fd) OVERRIDE;
++
++  void ProcessEvents(const struct input_event* inputs, int count);
++
++ private:
++  // File descriptor for the /dev/input/event* instance.
++  int fd_;
++
++  // Path to input device.
++  base::FilePath path_;
++
++  CursorDelegateEvdev *cursor_;
++
++  // Controller for watching the input fd.
++  base::MessagePumpLibevent::FileDescriptorWatcher controller_;
++
++  void ConvertMouseMoveEvent(const input_event& input);
++  void ConvertMouseButtonEvent(const input_event& input);
++
++  DISALLOW_COPY_AND_ASSIGN(MouseEventConverterEvdev);
++};
++
++}  // namspace ui
++
++#endif  // UI_EVENTS_OZONE_EVDEV_KEY_EVENT_CONVERTER_EVDEV_H_
+diff --git a/ui/events/ozone/events_ozone.gyp b/ui/events/ozone/events_ozone.gyp
+index e20e75a..dabab6b 100644
+--- a/ui/events/ozone/events_ozone.gyp
++++ b/ui/events/ozone/events_ozone.gyp
+@@ -72,6 +72,8 @@
+       'evdev/events_ozone_evdev_export.h',
+       'evdev/key_event_converter_evdev.cc',
+       'evdev/key_event_converter_evdev.h',
++      'evdev/mouse_event_converter_evdev.cc',
++      'evdev/mouse_event_converter_evdev.h',
+       'evdev/touch_event_converter_evdev.cc',
+       'evdev/touch_event_converter_evdev.h',
+     ],
+diff --git a/ui/gfx/ipc/OWNERS b/ui/gfx/ipc/OWNERS
+new file mode 100644
+index 0000000..16e98c2
+--- /dev/null
++++ b/ui/gfx/ipc/OWNERS
+@@ -0,0 +1,14 @@
++per-file gfx_param_traits.cc=set noparent
++per-file gfx_param_traits.cc=cevans@chromium.org
++per-file gfx_param_traits.cc=tsepez@chromium.org
++
++per-file *param_traits*.h=set noparent
++per-file *param_traits*.h=cevans@chromium.org
++per-file *param_traits*.h=dcheng@chromium.org
++per-file *param_traits*.h=inferno@chromium.org
++per-file *param_traits*.h=jln@chromium.org
++per-file *param_traits*.h=jschuh@chromium.org
++per-file *param_traits*.h=kenrb@chromium.org
++per-file *param_traits*.h=nasko@chromium.org
++per-file *param_traits*.h=palmer@chromium.org
++per-file *param_traits*.h=tsepez@chromium.org
+diff --git a/ui/gfx/ipc/gfx_ipc.gyp b/ui/gfx/ipc/gfx_ipc.gyp
+new file mode 100644
+index 0000000..1facce5
+--- /dev/null
++++ b/ui/gfx/ipc/gfx_ipc.gyp
+@@ -0,0 +1,31 @@
++# Copyright 2014 The Chromium Authors. All rights reserved.
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++{
++  'variables': {
++    'chromium_code': 1,
++  },
++  'targets': [
++     {
++      'target_name': 'gfx_ipc',
++      'type': '<(component)',
++      'dependencies': [
++        '../../../base/base.gyp:base',
++        '../../../ipc/ipc.gyp:ipc',
++        '../../../skia/skia.gyp:skia',
++        '../gfx.gyp:gfx_geometry',
++      ],
++      'defines': [
++        'GFX_IPC_IMPLEMENTATION',
++      ],
++      'include_dirs': [
++        '../../..',
++      ],
++      'sources': [
++        'gfx_param_traits.cc',
++        'gfx_param_traits.h',
++      ],
++    },
++  ],
++}
+diff --git a/ui/gfx/ipc/gfx_ipc_export.h b/ui/gfx/ipc/gfx_ipc_export.h
+new file mode 100644
+index 0000000..4c6b703
+--- /dev/null
++++ b/ui/gfx/ipc/gfx_ipc_export.h
+@@ -0,0 +1,29 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef GFX_IPC_EXPORT_H_
++#define GFX_IPC_EXPORT_H_
++
++#if defined(COMPONENT_BUILD)
++#if defined(WIN32)
++
++#if defined(GFX_IPC_IMPLEMENTATION)
++#define GFX_IPC_EXPORT __declspec(dllexport)
++#else
++#define GFX_IPC_EXPORT __declspec(dllimport)
++#endif  // defined(GFX_IPC_IMPLEMENTATION)
++
++#else  // defined(WIN32)
++#if defined(GFX_IPC_IMPLEMENTATION)
++#define GFX_IPC_EXPORT __attribute__((visibility("default")))
++#else
++#define GFX_IPC_EXPORT
++#endif
++#endif
++
++#else  // defined(COMPONENT_BUILD)
++#define GFX_IPC_EXPORT
++#endif
++
++#endif  // GFX_IPC_EXPORT_H_
+diff --git a/ui/gfx/ipc/gfx_param_traits.cc b/ui/gfx/ipc/gfx_param_traits.cc
+new file mode 100644
+index 0000000..f3550d5
+--- /dev/null
++++ b/ui/gfx/ipc/gfx_param_traits.cc
+@@ -0,0 +1,264 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "ui/gfx/ipc/gfx_param_traits.h"
++
++#include <string>
++
++#include "third_party/skia/include/core/SkBitmap.h"
++#include "ui/gfx/rect.h"
++#include "ui/gfx/rect_f.h"
++
++namespace {
++
++struct SkBitmap_Data {
++  // The configuration for the bitmap (bits per pixel, etc).
++  SkBitmap::Config fConfig;
++
++  // The width of the bitmap in pixels.
++  uint32 fWidth;
++
++  // The height of the bitmap in pixels.
++  uint32 fHeight;
++
++  void InitSkBitmapDataForTransfer(const SkBitmap& bitmap) {
++    fConfig = bitmap.config();
++    fWidth = bitmap.width();
++    fHeight = bitmap.height();
++  }
++
++  // Returns whether |bitmap| successfully initialized.
++  bool InitSkBitmapFromData(SkBitmap* bitmap, const char* pixels,
++                            size_t total_pixels) const {
++    if (total_pixels) {
++      bitmap->setConfig(fConfig, fWidth, fHeight, 0);
++      if (!bitmap->allocPixels())
++        return false;
++      if (total_pixels != bitmap->getSize())
++        return false;
++      memcpy(bitmap->getPixels(), pixels, total_pixels);
++    }
++    return true;
++  }
++};
++
++}  // namespace
++
++namespace IPC {
++
++void ParamTraits<gfx::Point>::Write(Message* m, const gfx::Point& p) {
++  m->WriteInt(p.x());
++  m->WriteInt(p.y());
++}
++
++bool ParamTraits<gfx::Point>::Read(const Message* m, PickleIterator* iter,
++                                   gfx::Point* r) {
++  int x, y;
++  if (!m->ReadInt(iter, &x) ||
++      !m->ReadInt(iter, &y))
++    return false;
++  r->set_x(x);
++  r->set_y(y);
++  return true;
++}
++
++void ParamTraits<gfx::Point>::Log(const gfx::Point& p, std::string* l) {
++  l->append(base::StringPrintf("(%d, %d)", p.x(), p.y()));
++}
++
++void ParamTraits<gfx::PointF>::Write(Message* m, const gfx::PointF& v) {
++  ParamTraits<float>::Write(m, v.x());
++  ParamTraits<float>::Write(m, v.y());
++}
++
++bool ParamTraits<gfx::PointF>::Read(const Message* m,
++                                      PickleIterator* iter,
++                                      gfx::PointF* r) {
++  float x, y;
++  if (!ParamTraits<float>::Read(m, iter, &x) ||
++      !ParamTraits<float>::Read(m, iter, &y))
++    return false;
++  r->set_x(x);
++  r->set_y(y);
++  return true;
++}
++
++void ParamTraits<gfx::PointF>::Log(const gfx::PointF& v, std::string* l) {
++  l->append(base::StringPrintf("(%f, %f)", v.x(), v.y()));
++}
++
++void ParamTraits<gfx::Size>::Write(Message* m, const gfx::Size& p) {
++  DCHECK_GE(p.width(), 0);
++  DCHECK_GE(p.height(), 0);
++  int values[2] = { p.width(), p.height() };
++  m->WriteBytes(&values, sizeof(int) * 2);
++}
++
++bool ParamTraits<gfx::Size>::Read(const Message* m,
++                                  PickleIterator* iter,
++                                  gfx::Size* r) {
++  const char* char_values;
++  if (!m->ReadBytes(iter, &char_values, sizeof(int) * 2))
++    return false;
++  const int* values = reinterpret_cast<const int*>(char_values);
++  if (values[0] < 0 || values[1] < 0)
++    return false;
++  r->set_width(values[0]);
++  r->set_height(values[1]);
++  return true;
++}
++
++void ParamTraits<gfx::Size>::Log(const gfx::Size& p, std::string* l) {
++  l->append(base::StringPrintf("(%d, %d)", p.width(), p.height()));
++}
++
++void ParamTraits<gfx::SizeF>::Write(Message* m, const gfx::SizeF& p) {
++  float values[2] = { p.width(), p.height() };
++  m->WriteBytes(&values, sizeof(float) * 2);
++}
++
++bool ParamTraits<gfx::SizeF>::Read(const Message* m,
++                                   PickleIterator* iter,
++                                   gfx::SizeF* r) {
++  const char* char_values;
++  if (!m->ReadBytes(iter, &char_values, sizeof(float) * 2))
++    return false;
++  const float* values = reinterpret_cast<const float*>(char_values);
++  r->set_width(values[0]);
++  r->set_height(values[1]);
++  return true;
++}
++
++void ParamTraits<gfx::SizeF>::Log(const gfx::SizeF& p, std::string* l) {
++  l->append(base::StringPrintf("(%f, %f)", p.width(), p.height()));
++}
++
++void ParamTraits<gfx::Vector2d>::Write(Message* m, const gfx::Vector2d& p) {
++  int values[2] = { p.x(), p.y() };
++  m->WriteBytes(&values, sizeof(int) * 2);
++}
++
++bool ParamTraits<gfx::Vector2d>::Read(const Message* m,
++                                      PickleIterator* iter,
++                                      gfx::Vector2d* r) {
++  const char* char_values;
++  if (!m->ReadBytes(iter, &char_values, sizeof(int) * 2))
++    return false;
++  const int* values = reinterpret_cast<const int*>(char_values);
++  r->set_x(values[0]);
++  r->set_y(values[1]);
++  return true;
++}
++
++void ParamTraits<gfx::Vector2d>::Log(const gfx::Vector2d& v, std::string* l) {
++  l->append(base::StringPrintf("(%d, %d)", v.x(), v.y()));
++}
++
++void ParamTraits<gfx::Vector2dF>::Write(Message* m, const gfx::Vector2dF& p) {
++  float values[2] = { p.x(), p.y() };
++  m->WriteBytes(&values, sizeof(float) * 2);
++}
++
++bool ParamTraits<gfx::Vector2dF>::Read(const Message* m,
++                                      PickleIterator* iter,
++                                      gfx::Vector2dF* r) {
++  const char* char_values;
++  if (!m->ReadBytes(iter, &char_values, sizeof(float) * 2))
++    return false;
++  const float* values = reinterpret_cast<const float*>(char_values);
++  r->set_x(values[0]);
++  r->set_y(values[1]);
++  return true;
++}
++
++void ParamTraits<gfx::Vector2dF>::Log(const gfx::Vector2dF& v, std::string* l) {
++  l->append(base::StringPrintf("(%f, %f)", v.x(), v.y()));
++}
++
++void ParamTraits<gfx::Rect>::Write(Message* m, const gfx::Rect& p) {
++  int values[4] = { p.x(), p.y(), p.width(), p.height() };
++  m->WriteBytes(&values, sizeof(int) * 4);
++}
++
++bool ParamTraits<gfx::Rect>::Read(const Message* m,
++                                  PickleIterator* iter,
++                                  gfx::Rect* r) {
++  const char* char_values;
++  if (!m->ReadBytes(iter, &char_values, sizeof(int) * 4))
++    return false;
++  const int* values = reinterpret_cast<const int*>(char_values);
++  if (values[2] < 0 || values[3] < 0)
++    return false;
++  r->SetRect(values[0], values[1], values[2], values[3]);
++  return true;
++}
++
++void ParamTraits<gfx::Rect>::Log(const gfx::Rect& p, std::string* l) {
++  l->append(base::StringPrintf("(%d, %d, %d, %d)", p.x(), p.y(),
++                               p.width(), p.height()));
++}
++
++void ParamTraits<gfx::RectF>::Write(Message* m, const gfx::RectF& p) {
++  float values[4] = { p.x(), p.y(), p.width(), p.height() };
++  m->WriteBytes(&values, sizeof(float) * 4);
++}
++
++bool ParamTraits<gfx::RectF>::Read(const Message* m,
++                                   PickleIterator* iter,
++                                   gfx::RectF* r) {
++  const char* char_values;
++  if (!m->ReadBytes(iter, &char_values, sizeof(float) * 4))
++    return false;
++  const float* values = reinterpret_cast<const float*>(char_values);
++  r->SetRect(values[0], values[1], values[2], values[3]);
++  return true;
++}
++
++void ParamTraits<gfx::RectF>::Log(const gfx::RectF& p, std::string* l) {
++  l->append(base::StringPrintf("(%f, %f, %f, %f)", p.x(), p.y(),
++                               p.width(), p.height()));
++}
++
++void ParamTraits<SkBitmap>::Write(Message* m, const SkBitmap& p) {
++  size_t fixed_size = sizeof(SkBitmap_Data);
++  SkBitmap_Data bmp_data;
++  bmp_data.InitSkBitmapDataForTransfer(p);
++  m->WriteData(reinterpret_cast<const char*>(&bmp_data),
++               static_cast<int>(fixed_size));
++  size_t pixel_size = p.getSize();
++  SkAutoLockPixels p_lock(p);
++  m->WriteData(reinterpret_cast<const char*>(p.getPixels()),
++               static_cast<int>(pixel_size));
++}
++
++bool ParamTraits<SkBitmap>::Read(const Message* m,
++                                 PickleIterator* iter,
++                                 SkBitmap* r) {
++  const char* fixed_data;
++  int fixed_data_size = 0;
++  if (!m->ReadData(iter, &fixed_data, &fixed_data_size) ||
++     (fixed_data_size <= 0)) {
++    NOTREACHED();
++    return false;
++  }
++  if (fixed_data_size != sizeof(SkBitmap_Data))
++    return false;  // Message is malformed.
++
++  const char* variable_data;
++  int variable_data_size = 0;
++  if (!m->ReadData(iter, &variable_data, &variable_data_size) ||
++     (variable_data_size < 0)) {
++    NOTREACHED();
++    return false;
++  }
++  const SkBitmap_Data* bmp_data =
++      reinterpret_cast<const SkBitmap_Data*>(fixed_data);
++  return bmp_data->InitSkBitmapFromData(r, variable_data, variable_data_size);
++}
++
++void ParamTraits<SkBitmap>::Log(const SkBitmap& p, std::string* l) {
++  l->append("<SkBitmap>");
++}
++
++}  // namespace IPC
+diff --git a/ui/gfx/ipc/gfx_param_traits.h b/ui/gfx/ipc/gfx_param_traits.h
+new file mode 100644
+index 0000000..2a8ef44
+--- /dev/null
++++ b/ui/gfx/ipc/gfx_param_traits.h
+@@ -0,0 +1,107 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef UI_GFX_IPC_GFX_PARAM_TRAITS_H_
++#define UI_GFX_IPC_GFX_PARAM_TRAITS_H_
++
++#include <string>
++
++#include "ipc/ipc_message_utils.h"
++#include "ui/gfx/ipc/gfx_ipc_export.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
++
++class SkBitmap;
++
++namespace gfx {
++class Point;
++class PointF;
++class Rect;
++class RectF;
++class Size;
++class SizeF;
++class Vector2d;
++class Vector2dF;
++}  // namespace gfx
++
++namespace IPC {
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<gfx::Point> {
++  typedef gfx::Point param_type;
++  static void Write(Message* m, const param_type& p);
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++  static void Log(const param_type& p, std::string* l);
++};
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<gfx::PointF> {
++  typedef gfx::PointF param_type;
++  static void Write(Message* m, const param_type& p);
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++  static void Log(const param_type& p, std::string* l);
++};
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<gfx::Size> {
++  typedef gfx::Size param_type;
++  static void Write(Message* m, const param_type& p);
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++  static void Log(const param_type& p, std::string* l);
++};
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<gfx::SizeF> {
++  typedef gfx::SizeF param_type;
++  static void Write(Message* m, const param_type& p);
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++  static void Log(const param_type& p, std::string* l);
++};
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<gfx::Vector2d> {
++  typedef gfx::Vector2d param_type;
++  static void Write(Message* m, const param_type& p);
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++  static void Log(const param_type& p, std::string* l);
++};
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<gfx::Vector2dF> {
++  typedef gfx::Vector2dF param_type;
++  static void Write(Message* m, const param_type& p);
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++  static void Log(const param_type& p, std::string* l);
++};
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<gfx::Rect> {
++  typedef gfx::Rect param_type;
++  static void Write(Message* m, const param_type& p);
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++  static void Log(const param_type& p, std::string* l);
++};
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<gfx::RectF> {
++  typedef gfx::RectF param_type;
++  static void Write(Message* m, const param_type& p);
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++  static void Log(const param_type& p, std::string* l);
++};
++
++template <>
++struct GFX_IPC_EXPORT ParamTraits<SkBitmap> {
++  typedef SkBitmap param_type;
++  static void Write(Message* m, const param_type& p);
++
++  // Note: This function expects parameter |r| to be of type &SkBitmap since
++  // r->SetConfig() and r->SetPixels() are called.
++  static bool Read(const Message* m, PickleIterator* iter, param_type* r);
++
++  static void Log(const param_type& p, std::string* l);
++};
++
++}  // namespace IPC
++
++#endif  // UI_GFX_IPC_GFX_PARAM_TRAITS_H_
+diff --git a/ui/ozone/DEPS b/ui/ozone/DEPS
+index 7346019..8f39e9e 100644
+--- a/ui/ozone/DEPS
++++ b/ui/ozone/DEPS
+@@ -1,4 +1,6 @@
+ include_rules = [
++  "+skia/ext",
++  "+third_party/skia",
+   "+ui/display/types",
+   "+ui/events",
+   "+ui/gfx",
+diff --git a/ui/ozone/common/gpu/OWNERS b/ui/ozone/common/gpu/OWNERS
+new file mode 100644
+index 0000000..2c10c12
+--- /dev/null
++++ b/ui/ozone/common/gpu/OWNERS
+@@ -0,0 +1,12 @@
++# Changes to IPC messages require a security review to avoid introducing
++# new sandbox escapes.
++per-file *_message*.h=set noparent
++per-file *_message*.h=cevans@chromium.org
++per-file *_message*.h=dcheng@chromium.org
++per-file *_message*.h=inferno@chromium.org
++per-file *_message*.h=jln@chromium.org
++per-file *_message*.h=jschuh@chromium.org
++per-file *_message*.h=kenrb@chromium.org
++per-file *_message*.h=nasko@chromium.org
++per-file *_message*.h=palmer@chromium.org
++per-file *_message*.h=tsepez@chromium.org
+diff --git a/ui/ozone/common/gpu/ozone_gpu_message_generator.cc b/ui/ozone/common/gpu/ozone_gpu_message_generator.cc
+new file mode 100644
+index 0000000..d3032ed
+--- /dev/null
++++ b/ui/ozone/common/gpu/ozone_gpu_message_generator.cc
+@@ -0,0 +1,33 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++// Get basic type definitions.
++#define IPC_MESSAGE_IMPL
++#include "ui/ozone/common/gpu/ozone_gpu_message_generator.h"
++
++// Generate constructors.
++#include "ipc/struct_constructor_macros.h"
++#include "ui/ozone/common/gpu/ozone_gpu_message_generator.h"
++
++// Generate destructors.
++#include "ipc/struct_destructor_macros.h"
++#include "ui/ozone/common/gpu/ozone_gpu_message_generator.h"
++
++// Generate param traits write methods.
++#include "ipc/param_traits_write_macros.h"
++namespace IPC {
++#include "ui/ozone/common/gpu/ozone_gpu_message_generator.h"
++}  // namespace IPC
++
++// Generate param traits read methods.
++#include "ipc/param_traits_read_macros.h"
++namespace IPC {
++#include "ui/ozone/common/gpu/ozone_gpu_message_generator.h"
++}  // namespace IPC
++
++// Generate param traits log methods.
++#include "ipc/param_traits_log_macros.h"
++namespace IPC {
++#include "ui/ozone/common/gpu/ozone_gpu_message_generator.h"
++}  // namespace IPC
+diff --git a/ui/ozone/common/gpu/ozone_gpu_message_generator.h b/ui/ozone/common/gpu/ozone_gpu_message_generator.h
+new file mode 100644
+index 0000000..3b35c0e
+--- /dev/null
++++ b/ui/ozone/common/gpu/ozone_gpu_message_generator.h
+@@ -0,0 +1,7 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++// Multiply-included file, hence no include guard.
++
++#include "ui/ozone/common/gpu/ozone_gpu_messages.h"
+diff --git a/ui/ozone/common/gpu/ozone_gpu_messages.h b/ui/ozone/common/gpu/ozone_gpu_messages.h
+new file mode 100644
+index 0000000..be5cb6a
+--- /dev/null
++++ b/ui/ozone/common/gpu/ozone_gpu_messages.h
+@@ -0,0 +1,30 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++// Multiply-included message file, hence no include guard here, but see below
++// for a much smaller-than-usual include guard section.
++
++#include "ipc/ipc_message_macros.h"
++#include "third_party/skia/include/core/SkBitmap.h"
++#include "ui/gfx/geometry/point.h"
++#include "ui/gfx/ipc/gfx_param_traits.h"
++#include "ui/gfx/native_widget_types.h"
++#include "ui/ozone/ozone_export.h"
++
++#undef IPC_MESSAGE_EXPORT
++#define IPC_MESSAGE_EXPORT OZONE_EXPORT
++
++#define IPC_MESSAGE_START OzoneGpuMsgStart
++
++//------------------------------------------------------------------------------
++// GPU Messages
++// These are messages from the browser to the GPU process.
++
++// Update the HW cursor bitmap & move to specified location.
++IPC_MESSAGE_CONTROL3(OzoneGpuMsg_CursorSet,
++                     gfx::AcceleratedWidget, SkBitmap, gfx::Point)
++
++// Move the HW cursor to the specified location.
++IPC_MESSAGE_CONTROL2(OzoneGpuMsg_CursorMove,
++                     gfx::AcceleratedWidget, gfx::Point)
+diff --git a/ui/ozone/ozone.gyp b/ui/ozone/ozone.gyp
+index 74cb523..422ea81 100644
+--- a/ui/ozone/ozone.gyp
++++ b/ui/ozone/ozone.gyp
+@@ -84,6 +84,8 @@
+         'common/chromeos/native_display_delegate_ozone.h',
+         'common/chromeos/touchscreen_device_manager_ozone.cc',
+         'common/chromeos/touchscreen_device_manager_ozone.h',
++        'common/gpu/ozone_gpu_message_generator.cc',
++        'common/gpu/ozone_gpu_message_generator.h',
+         'ozone_platform.cc',
+         'ozone_platform.h',
+         'ozone_switches.cc',
+diff --git a/ui/ozone/platform/caca/DEPS b/ui/ozone/platform/caca/DEPS
+deleted file mode 100644
+index 46d48b3..0000000
+--- a/ui/ozone/platform/caca/DEPS
++++ /dev/null
+@@ -1,3 +0,0 @@
+-include_rules = [
+-  "+third_party/skia",
+-]
+diff --git a/ui/ozone/platform/dri/DEPS b/ui/ozone/platform/dri/DEPS
+deleted file mode 100644
+index ee54c22..0000000
+--- a/ui/ozone/platform/dri/DEPS
++++ /dev/null
+@@ -1,4 +0,0 @@
+-include_rules = [
+-  "+skia/ext",
+-  "+third_party/skia",
+-]
+diff --git a/ui/ozone/platform/dri/buffer_data.cc b/ui/ozone/platform/dri/buffer_data.cc
+index a2ea1b3..3462fd0 100644
+--- a/ui/ozone/platform/dri/buffer_data.cc
++++ b/ui/ozone/platform/dri/buffer_data.cc
+@@ -20,6 +20,7 @@ const uint8_t kPixelDepth = 32;
+ BufferData::BufferData(DriWrapper* dri, gbm_bo* buffer)
+     : dri_(dri),
+       handle_(gbm_bo_get_handle(buffer).u32),
++      stride_(gbm_bo_get_stride(buffer)),
+       framebuffer_(0) {
+   // Register the buffer with the controller. This will allow us to scan out the
+   // buffer once we're done drawing into it. If we can't register the buffer
+diff --git a/ui/ozone/platform/dri/buffer_data.h b/ui/ozone/platform/dri/buffer_data.h
+index 2f3422d..0578d3c 100644
+--- a/ui/ozone/platform/dri/buffer_data.h
++++ b/ui/ozone/platform/dri/buffer_data.h
+@@ -32,6 +32,7 @@ class BufferData {
+ 
+   uint32_t framebuffer() const { return framebuffer_; }
+   uint32_t handle() const { return handle_; }
++  uint32_t stride() const { return stride_; }
+ 
+  private:
+   BufferData(DriWrapper* dri, gbm_bo* buffer);
+@@ -41,6 +42,8 @@ class BufferData {
+ 
+   uint32_t handle_;
+ 
++  uint32_t stride_;
++
+   // ID provided by the controller when the buffer is registered. This ID is
+   // used when scanning out the buffer.
+   uint32_t framebuffer_;
+diff --git a/ui/ozone/platform/dri/cursor_factory_evdev_dri.cc b/ui/ozone/platform/dri/cursor_factory_evdev_dri.cc
+index d03aac1..5f9b50b 100644
+--- a/ui/ozone/platform/dri/cursor_factory_evdev_dri.cc
++++ b/ui/ozone/platform/dri/cursor_factory_evdev_dri.cc
+@@ -6,11 +6,12 @@
+ 
+ #include "ui/gfx/geometry/point_conversions.h"
+ #include "ui/ozone/platform/dri/dri_surface_factory.h"
++#include "ui/ozone/platform/dri/hardware_cursor_delegate.h"
+ 
+ namespace ui {
+ 
+-CursorFactoryEvdevDri::CursorFactoryEvdevDri(DriSurfaceFactory* dri)
+-    : dri_(dri) {
++CursorFactoryEvdevDri::CursorFactoryEvdevDri(HardwareCursorDelegate* hardware)
++    : hardware_(hardware) {
+   // TODO(dnicoara) Assume the first widget since at this point there are no
+   // widgets initialized.
+   cursor_window_ = DriSurfaceFactory::kDefaultWidgetHandle;
+@@ -27,26 +28,26 @@ void CursorFactoryEvdevDri::SetBitmapCursor(
+ 
+   cursor_ = cursor;
+   if (cursor_)
+-    dri_->SetHardwareCursor(
++    hardware_->SetHardwareCursor(
+         cursor_window_, cursor_->bitmap(), bitmap_location());
+   else
+-    dri_->UnsetHardwareCursor(cursor_window_);
++    hardware_->SetHardwareCursor(cursor_window_, SkBitmap(), gfx::Point());
+ }
+ 
+ void CursorFactoryEvdevDri::MoveCursorTo(gfx::AcceleratedWidget widget,
+                                          const gfx::PointF& location) {
+   if (widget != cursor_window_)
+-    dri_->UnsetHardwareCursor(cursor_window_);
++    hardware_->SetHardwareCursor(cursor_window_, SkBitmap(), gfx::Point());
+ 
+   cursor_window_ = widget;
+   cursor_location_ = location;
+ 
+-  gfx::Size size = dri_->GetWidgetSize(cursor_window_);
++  gfx::Size size = gfx::Size(2560, 1700);  // TODO(spang): Fix.
+   cursor_location_.SetToMax(gfx::PointF(0, 0));
+   cursor_location_.SetToMin(gfx::PointF(size.width(), size.height()));
+ 
+   if (cursor_)
+-    dri_->MoveHardwareCursor(cursor_window_, bitmap_location());
++    hardware_->MoveHardwareCursor(cursor_window_, bitmap_location());
+ }
+ 
+ void CursorFactoryEvdevDri::MoveCursor(const gfx::Vector2dF& delta) {
+diff --git a/ui/ozone/platform/dri/cursor_factory_evdev_dri.h b/ui/ozone/platform/dri/cursor_factory_evdev_dri.h
+index da13219..ae04d01 100644
+--- a/ui/ozone/platform/dri/cursor_factory_evdev_dri.h
++++ b/ui/ozone/platform/dri/cursor_factory_evdev_dri.h
+@@ -13,15 +13,13 @@
+ #include "ui/gfx/native_widget_types.h"
+ 
+ namespace ui {
+-class DriSurfaceFactory;
+-}
+ 
+-namespace ui {
++class HardwareCursorDelegate;
+ 
+ class CursorFactoryEvdevDri : public BitmapCursorFactoryOzone,
+                               public CursorDelegateEvdev {
+  public:
+-  CursorFactoryEvdevDri(DriSurfaceFactory* dri);
++  CursorFactoryEvdevDri(HardwareCursorDelegate* cursor);
+   virtual ~CursorFactoryEvdevDri();
+ 
+   // BitmapCursorFactoryOzone:
+@@ -41,7 +39,7 @@ class CursorFactoryEvdevDri : public BitmapCursorFactoryOzone,
+   gfx::Point bitmap_location();
+ 
+   // The DRI implementation for setting the hardware cursor.
+-  DriSurfaceFactory* dri_;
++  HardwareCursorDelegate* hardware_;
+ 
+   // The current cursor bitmap.
+   scoped_refptr<BitmapCursorOzone> cursor_;
+diff --git a/ui/ozone/platform/dri/dri_surface.cc b/ui/ozone/platform/dri/dri_surface.cc
+index d6b4f59..6e3f347 100644
+--- a/ui/ozone/platform/dri/dri_surface.cc
++++ b/ui/ozone/platform/dri/dri_surface.cc
+@@ -56,6 +56,11 @@ uint32_t DriSurface::GetHandle() const {
+   return backbuffer()->handle();
+ }
+ 
++uint32_t DriSurface::GetStride() const {
++  CHECK(backbuffer());
++  return backbuffer()->stride();
++}
++
+ // This call is made after the hardware just started displaying our back buffer.
+ // We need to update our pointer reference and synchronize the two buffers.
+ void DriSurface::SwapBuffers() {
+diff --git a/ui/ozone/platform/dri/dri_surface.h b/ui/ozone/platform/dri/dri_surface.h
+index 2abae45..bd4b52a 100644
+--- a/ui/ozone/platform/dri/dri_surface.h
++++ b/ui/ozone/platform/dri/dri_surface.h
+@@ -35,6 +35,7 @@ class OZONE_EXPORT DriSurface : public ScanoutSurface {
+   virtual uint32_t GetHandle() const OVERRIDE;
+   virtual void SwapBuffers() OVERRIDE;
+   virtual gfx::Size Size() const OVERRIDE;
++  virtual uint32_t GetStride() const OVERRIDE;
+ 
+  private:
+   DriBuffer* frontbuffer() const { return bitmaps_[front_buffer_].get(); }
+diff --git a/ui/ozone/platform/dri/dri_surface_factory.cc b/ui/ozone/platform/dri/dri_surface_factory.cc
+index bbfb6e2..db5be89 100644
+--- a/ui/ozone/platform/dri/dri_surface_factory.cc
++++ b/ui/ozone/platform/dri/dri_surface_factory.cc
+@@ -213,15 +213,6 @@ void DriSurfaceFactory::MoveHardwareCursor(gfx::AcceleratedWidget window,
+     controller->MoveCursor(location);
+ }
+ 
+-void DriSurfaceFactory::UnsetHardwareCursor(gfx::AcceleratedWidget window) {
+-  cursor_bitmap_.reset();
+-
+-  if (state_ != INITIALIZED)
+-    return;
+-
+-  ResetCursor(window);
+-}
+-
+ ////////////////////////////////////////////////////////////////////////////////
+ // DriSurfaceFactory private
+ 
+diff --git a/ui/ozone/platform/dri/dri_surface_factory.h b/ui/ozone/platform/dri/dri_surface_factory.h
+index 69ec5df..324f554 100644
+--- a/ui/ozone/platform/dri/dri_surface_factory.h
++++ b/ui/ozone/platform/dri/dri_surface_factory.h
+@@ -10,25 +10,24 @@
+ #include "base/memory/scoped_ptr.h"
+ #include "third_party/skia/include/core/SkBitmap.h"
+ #include "ui/ozone/ozone_export.h"
++#include "ui/ozone/platform/dri/hardware_cursor_delegate.h"
+ #include "ui/ozone/public/surface_factory_ozone.h"
+ 
+ typedef struct _drmModeModeInfo drmModeModeInfo;
+ 
+-namespace gfx {
+-class SurfaceOzoneCanvas;
+-}
+-
+ namespace ui {
+ 
+ class DriSurface;
+ class DriWrapper;
+ class HardwareDisplayController;
+ class ScreenManager;
++class SurfaceOzoneCanvas;
+ 
+ // SurfaceFactoryOzone implementation on top of DRM/KMS using dumb buffers.
+ // This implementation is used in conjunction with the software rendering
+ // path.
+-class OZONE_EXPORT DriSurfaceFactory : public ui::SurfaceFactoryOzone {
++class OZONE_EXPORT DriSurfaceFactory : public ui::SurfaceFactoryOzone,
++                                       public HardwareCursorDelegate {
+  public:
+   static const gfx::AcceleratedWidget kDefaultWidgetHandle;
+ 
+@@ -50,14 +49,12 @@ class OZONE_EXPORT DriSurfaceFactory : public ui::SurfaceFactoryOzone {
+ 
+   gfx::Size GetWidgetSize(gfx::AcceleratedWidget w);
+ 
+-  void SetHardwareCursor(gfx::AcceleratedWidget window,
+-                         const SkBitmap& image,
+-                         const gfx::Point& location);
+-
+-  void MoveHardwareCursor(gfx::AcceleratedWidget window,
+-                          const gfx::Point& location);
+-
+-  void UnsetHardwareCursor(gfx::AcceleratedWidget window);
++  // HardwareCursorDelegate:
++  virtual void SetHardwareCursor(gfx::AcceleratedWidget window,
++                                 const SkBitmap& image,
++                                 const gfx::Point& location) OVERRIDE;
++  virtual void MoveHardwareCursor(gfx::AcceleratedWidget window,
++                                  const gfx::Point& location) OVERRIDE;
+ 
+  protected:
+   // Draw the last set cursor & update the cursor plane.
+diff --git a/ui/ozone/platform/dri/gbm.gypi b/ui/ozone/platform/dri/gbm.gypi
+index 91c0e87..89b4d00 100644
+--- a/ui/ozone/platform/dri/gbm.gypi
++++ b/ui/ozone/platform/dri/gbm.gypi
+@@ -35,6 +35,10 @@
+         'gbm_surface.h',
+         'gbm_surface_factory.cc',
+         'gbm_surface_factory.h',
++        'gpu_platform_support_gbm.cc',
++        'gpu_platform_support_gbm.h',
++        'gpu_platform_support_host_gbm.cc',
++        'gpu_platform_support_host_gbm.h',
+         'ozone_platform_gbm.cc',
+         'ozone_platform_gbm.h',
+       ],
+diff --git a/ui/ozone/platform/dri/gbm_surface.cc b/ui/ozone/platform/dri/gbm_surface.cc
+index 99f0ae7..0aefa75 100644
+--- a/ui/ozone/platform/dri/gbm_surface.cc
++++ b/ui/ozone/platform/dri/gbm_surface.cc
+@@ -81,6 +81,16 @@ gfx::Size GbmSurface::Size() const {
+   return size_;
+ }
+ 
++uint32_t GbmSurface::GetStride() const {
++  if (!buffers_[front_buffer_ ^ 1])
++    return dumb_buffer_->stride();
++
++  BufferData* data = BufferData::GetData(buffers_[front_buffer_ ^ 1]);
++  CHECK(data);
++
++  return data->stride();
++}
++
+ void GbmSurface::SwapBuffers() {
+   // If there was a frontbuffer, is no longer active. Release it back to GBM.
+   if (buffers_[front_buffer_])
+diff --git a/ui/ozone/platform/dri/gbm_surface.h b/ui/ozone/platform/dri/gbm_surface.h
+index 8a33ab5..ccf3ebb 100644
+--- a/ui/ozone/platform/dri/gbm_surface.h
++++ b/ui/ozone/platform/dri/gbm_surface.h
+@@ -33,6 +33,7 @@ class GbmSurface : public ScanoutSurface {
+   virtual uint32_t GetHandle() const OVERRIDE;
+   virtual gfx::Size Size() const OVERRIDE;
+   virtual void SwapBuffers() OVERRIDE;
++  virtual uint32_t GetStride() const OVERRIDE;
+ 
+   // Before scheduling the backbuffer to be scanned out we need to "lock" it.
+   // When we lock it, GBM will give a pointer to a buffer representing the
+diff --git a/ui/ozone/platform/dri/gbm_surface_factory.cc b/ui/ozone/platform/dri/gbm_surface_factory.cc
+index 5eb93fc..9e9d3c4 100644
+--- a/ui/ozone/platform/dri/gbm_surface_factory.cc
++++ b/ui/ozone/platform/dri/gbm_surface_factory.cc
+@@ -152,7 +152,7 @@ scoped_ptr<ui::SurfaceOzoneEGL> GbmSurfaceFactory::CreateEGLSurfaceForWidget(
+       new GbmSurfaceAdapter(screen_manager_->GetDisplayController(w)));
+ }
+ 
+-gfx::NativeBufferOzone GbmSurfaceFactory::CreateNativeBuffer(
++ui::NativeBufferOzone GbmSurfaceFactory::CreateNativeBuffer(
+     gfx::Size size,
+     BufferFormat format) {
+   uint32_t gbm_format = 0;
+@@ -181,7 +181,7 @@ gfx::NativeBufferOzone GbmSurfaceFactory::CreateNativeBuffer(
+   BufferData* data = BufferData::CreateData(drm_, buffer_object);
+   DCHECK(data) << "Failed to associate the buffer with the controller";
+ 
+-  return reinterpret_cast<gfx::NativeBufferOzone>(buffer_object);
++  return reinterpret_cast<ui::NativeBufferOzone>(buffer_object);
+ }
+ 
+ }  // namespace ui
+diff --git a/ui/ozone/platform/dri/gbm_surface_factory.h b/ui/ozone/platform/dri/gbm_surface_factory.h
+index da624bf..0d1fc6d 100644
+--- a/ui/ozone/platform/dri/gbm_surface_factory.h
++++ b/ui/ozone/platform/dri/gbm_surface_factory.h
+@@ -27,7 +27,7 @@ class GbmSurfaceFactory : public DriSurfaceFactory {
+       SetGLGetProcAddressProcCallback set_gl_get_proc_address) OVERRIDE;
+   virtual scoped_ptr<ui::SurfaceOzoneEGL> CreateEGLSurfaceForWidget(
+       gfx::AcceleratedWidget w) OVERRIDE;
+-  virtual gfx::NativeBufferOzone CreateNativeBuffer(
++  virtual ui::NativeBufferOzone CreateNativeBuffer(
+       gfx::Size size,
+       BufferFormat format) OVERRIDE;
+ 
+diff --git a/ui/ozone/platform/dri/gpu_platform_support_gbm.cc b/ui/ozone/platform/dri/gpu_platform_support_gbm.cc
+new file mode 100644
+index 0000000..70c99f4
+--- /dev/null
++++ b/ui/ozone/platform/dri/gpu_platform_support_gbm.cc
+@@ -0,0 +1,44 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "ui/ozone/platform/dri/gpu_platform_support_gbm.h"
++
++#include "ipc/ipc_message_macros.h"
++#include "ui/ozone/common/gpu/ozone_gpu_messages.h"
++#include "ui/ozone/platform/dri/dri_surface_factory.h"
++
++namespace ui {
++
++GpuPlatformSupportGbm::GpuPlatformSupportGbm(DriSurfaceFactory* dri)
++    : sender_(NULL), dri_(dri) {
++}
++
++void GpuPlatformSupportGbm::OnChannelEstablished(IPC::Sender* sender) {
++  sender_ = sender;
++}
++
++bool GpuPlatformSupportGbm::OnMessageReceived(const IPC::Message& message) {
++  bool handled = true;
++
++  IPC_BEGIN_MESSAGE_MAP(GpuPlatformSupportGbm, message)
++  IPC_MESSAGE_HANDLER(OzoneGpuMsg_CursorSet, OnCursorSet)
++  IPC_MESSAGE_HANDLER(OzoneGpuMsg_CursorMove, OnCursorMove)
++  IPC_MESSAGE_UNHANDLED(handled = false);
++  IPC_END_MESSAGE_MAP()
++
++  return handled;
++}
++
++void GpuPlatformSupportGbm::OnCursorSet(gfx::AcceleratedWidget widget,
++                                        const SkBitmap& bitmap,
++                                        const gfx::Point& location) {
++  dri_->SetHardwareCursor(widget, bitmap, location);
++}
++
++void GpuPlatformSupportGbm::OnCursorMove(gfx::AcceleratedWidget widget,
++                                         const gfx::Point& location) {
++  dri_->MoveHardwareCursor(widget, location);
++}
++
++}  // namespace ui
+diff --git a/ui/ozone/platform/dri/gpu_platform_support_gbm.h b/ui/ozone/platform/dri/gpu_platform_support_gbm.h
+new file mode 100644
+index 0000000..5859716
+--- /dev/null
++++ b/ui/ozone/platform/dri/gpu_platform_support_gbm.h
+@@ -0,0 +1,45 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef UI_OZONE_PLATFORM_DRI_GPU_PLATFORM_SUPPORT_GBM_H_
++#define UI_OZONE_PLATFORM_DRI_GPU_PLATFORM_SUPPORT_GBM_H_
++
++#include "ui/gfx/native_widget_types.h"
++#include "ui/ozone/ozone_export.h"
++#include "ui/ozone/public/gpu_platform_support.h"
++
++class SkBitmap;
++
++namespace gfx {
++class Point;
++}
++
++namespace ui {
++
++class DriSurfaceFactory;
++
++class OZONE_EXPORT GpuPlatformSupportGbm : public GpuPlatformSupport {
++ public:
++  GpuPlatformSupportGbm(DriSurfaceFactory* dri);
++
++  // GpuPlatformSupport:
++  virtual void OnChannelEstablished(IPC::Sender* sender) OVERRIDE;
++
++  // IPC::Listener:
++  virtual bool OnMessageReceived(const IPC::Message& message) OVERRIDE;
++
++ private:
++  IPC::Sender* sender_;
++
++  void OnCursorSet(gfx::AcceleratedWidget widget,
++                   const SkBitmap& bitmap,
++                   const gfx::Point& location);
++  void OnCursorMove(gfx::AcceleratedWidget widget, const gfx::Point& location);
++
++  DriSurfaceFactory* dri_;
++};
++
++}  // namespace ui
++
++#endif  // UI_OZONE_PLATFORM_DRI_GPU_PLATFORM_SUPPORT_GBM_H_
+diff --git a/ui/ozone/platform/dri/gpu_platform_support_host_gbm.cc b/ui/ozone/platform/dri/gpu_platform_support_host_gbm.cc
+new file mode 100644
+index 0000000..39478bd
+--- /dev/null
++++ b/ui/ozone/platform/dri/gpu_platform_support_host_gbm.cc
+@@ -0,0 +1,46 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "ui/ozone/platform/dri/gpu_platform_support_host_gbm.h"
++
++#include "ui/ozone/common/gpu/ozone_gpu_messages.h"
++
++namespace ui {
++
++GpuPlatformSupportHostGbm::GpuPlatformSupportHostGbm()
++    : host_id_(-1), sender_(NULL) {
++}
++
++void GpuPlatformSupportHostGbm::OnChannelEstablished(int host_id,
++                                                     IPC::Sender* sender) {
++  host_id_ = host_id;
++  sender_ = sender;
++}
++
++void GpuPlatformSupportHostGbm::OnChannelDestroyed(int host_id) {
++  if (host_id_ == host_id) {
++    host_id_ = -1;
++    sender_ = NULL;
++  }
++}
++
++bool GpuPlatformSupportHostGbm::OnMessageReceived(const IPC::Message& message) {
++  return false;
++}
++
++void GpuPlatformSupportHostGbm::SetHardwareCursor(gfx::AcceleratedWidget widget,
++                                                  const SkBitmap& bitmap,
++                                                  const gfx::Point& location) {
++  if (sender_)
++    sender_->Send(new OzoneGpuMsg_CursorSet(widget, bitmap, location));
++}
++
++void GpuPlatformSupportHostGbm::MoveHardwareCursor(
++    gfx::AcceleratedWidget widget,
++    const gfx::Point& location) {
++  if (sender_)
++    sender_->Send(new OzoneGpuMsg_CursorMove(widget, location));
++}
++
++}  // namespace ui
+diff --git a/ui/ozone/platform/dri/gpu_platform_support_host_gbm.h b/ui/ozone/platform/dri/gpu_platform_support_host_gbm.h
+new file mode 100644
+index 0000000..8330e85
+--- /dev/null
++++ b/ui/ozone/platform/dri/gpu_platform_support_host_gbm.h
+@@ -0,0 +1,47 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef UI_OZONE_PLATFORM_DRI_GPU_PLATFORM_SUPPORT_HOST_GBM_H_
++#define UI_OZONE_PLATFORM_DRI_GPU_PLATFORM_SUPPORT_HOST_GBM_H_
++
++#include "ui/gfx/native_widget_types.h"
++#include "ui/ozone/ozone_export.h"
++#include "ui/ozone/platform/dri/hardware_cursor_delegate.h"
++#include "ui/ozone/public/gpu_platform_support_host.h"
++
++class SkBitmap;
++
++namespace gfx {
++class Point;
++}
++
++namespace ui {
++
++class OZONE_EXPORT GpuPlatformSupportHostGbm : public GpuPlatformSupportHost,
++                                               public HardwareCursorDelegate {
++ public:
++  GpuPlatformSupportHostGbm();
++
++  // GpuPlatformSupportHost:
++  virtual void OnChannelEstablished(int host_id, IPC::Sender* sender) OVERRIDE;
++  virtual void OnChannelDestroyed(int host_id) OVERRIDE;
++
++  // IPC::Listener:
++  virtual bool OnMessageReceived(const IPC::Message& message) OVERRIDE;
++
++  // HardwareCursorDelegate:
++  virtual void SetHardwareCursor(gfx::AcceleratedWidget widget,
++                                 const SkBitmap& bitmap,
++                                 const gfx::Point& location) OVERRIDE;
++  virtual void MoveHardwareCursor(gfx::AcceleratedWidget widget,
++                                  const gfx::Point& location) OVERRIDE;
++
++ private:
++  int host_id_;
++  IPC::Sender* sender_;
++};
++
++}  // namespace ui
++
++#endif  // UI_OZONE_GPU_GPU_PLATFORM_SUPPORT_HOST_GBM_H_
+diff --git a/ui/ozone/platform/dri/hardware_cursor_delegate.h b/ui/ozone/platform/dri/hardware_cursor_delegate.h
+new file mode 100644
+index 0000000..843b98a
+--- /dev/null
++++ b/ui/ozone/platform/dri/hardware_cursor_delegate.h
+@@ -0,0 +1,36 @@
++// Copyright 2014 The Chromium Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef UI_OZONE_PLATFORM_DRI_HARDWARE_CURSOR_DELEGATE_H_
++#define UI_OZONE_PLATFORM_DRI_HARDWARE_CURSOR_DELEGATE_H_
++
++#include "ui/gfx/native_widget_types.h"
++
++class SkBitmap;
++
++namespace gfx {
++class Point;
++}
++
++namespace ui {
++
++class OZONE_EXPORT HardwareCursorDelegate {
++ public:
++  // Update the HW cursor bitmap & move to specified location. If
++  // the bitmap is empty, the cursor is hidden.
++  virtual void SetHardwareCursor(gfx::AcceleratedWidget widget,
++                                 const SkBitmap& bitmap,
++                                 const gfx::Point& location) = 0;
++
++  // Move the HW cursor to the specified location.
++  virtual void MoveHardwareCursor(gfx::AcceleratedWidget widget,
++                                  const gfx::Point& location) = 0;
++
++ protected:
++  virtual ~HardwareCursorDelegate() {}
++};
++
++}  // namespace ui
++
++#endif  // UI_OZONE_PLATFORM_DRI_HARDWARE_CURSOR_DELEGATE_H_
+diff --git a/ui/ozone/platform/dri/hardware_display_controller.cc b/ui/ozone/platform/dri/hardware_display_controller.cc
+index 4b00c6e..f909372 100644
+--- a/ui/ozone/platform/dri/hardware_display_controller.cc
++++ b/ui/ozone/platform/dri/hardware_display_controller.cc
+@@ -110,13 +110,23 @@ void HardwareDisplayController::Disable() {
+ 
+ bool HardwareDisplayController::SchedulePageFlip() {
+   CHECK(surface_);
+-  if (!is_disabled_ && !drm_->PageFlip(crtc_id_,
+-                                       surface_->GetFramebufferId(),
+-                                       this)) {
++  if (is_disabled_)
++    return true;
++
++  if (surface_->GetStride() != current_stride_ &&
++      !drm_->SetCrtc(crtc_id_, surface_->GetFramebufferId(),
++                     &connector_id_, &mode_)) {
++    LOG(ERROR) << "Cannot mode set: " << strerror(errno);
++    return false;
++  }
++
++  if (!drm_->PageFlip(crtc_id_, surface_->GetFramebufferId(), this)) {
+     LOG(ERROR) << "Cannot page flip: " << strerror(errno);
+     return false;
+   }
+ 
++  current_stride_ = surface_->GetStride();
++
+   return true;
+ }
+ 
+diff --git a/ui/ozone/platform/dri/hardware_display_controller.h b/ui/ozone/platform/dri/hardware_display_controller.h
+index b6ac900..b9d307a 100644
+--- a/ui/ozone/platform/dri/hardware_display_controller.h
++++ b/ui/ozone/platform/dri/hardware_display_controller.h
+@@ -174,6 +174,8 @@ class OZONE_EXPORT HardwareDisplayController
+   // is set to false. Otherwise it is true.
+   bool is_disabled_;
+ 
++  uint32_t current_stride_;
++
+   DISALLOW_COPY_AND_ASSIGN(HardwareDisplayController);
+ };
+ 
+diff --git a/ui/ozone/platform/dri/ozone_platform_gbm.cc b/ui/ozone/platform/dri/ozone_platform_gbm.cc
+index 440614b..9892c96 100644
+--- a/ui/ozone/platform/dri/ozone_platform_gbm.cc
++++ b/ui/ozone/platform/dri/ozone_platform_gbm.cc
+@@ -12,13 +12,18 @@
+ #include "ui/events/ozone/device/device_manager.h"
+ #include "ui/events/ozone/evdev/event_factory_evdev.h"
+ #include "ui/ozone/ozone_platform.h"
++#include "ui/ozone/platform/dri/cursor_factory_evdev_dri.h"
+ #include "ui/ozone/platform/dri/dri_wrapper.h"
+ #include "ui/ozone/platform/dri/gbm_surface.h"
+ #include "ui/ozone/platform/dri/gbm_surface_factory.h"
++#include "ui/ozone/platform/dri/gpu_platform_support_gbm.h"
++#include "ui/ozone/platform/dri/gpu_platform_support_host_gbm.h"
+ #include "ui/ozone/platform/dri/scanout_surface.h"
+ #include "ui/ozone/platform/dri/screen_manager.h"
+ #include "ui/ozone/platform/dri/virtual_terminal_manager.h"
+ #include "ui/ozone/public/cursor_factory_ozone.h"
++#include "ui/ozone/public/gpu_platform_support.h"
++#include "ui/ozone/public/gpu_platform_support_host.h"
+ 
+ #if defined(OS_CHROMEOS)
+ #include "ui/ozone/common/chromeos/native_display_delegate_ozone.h"
+@@ -79,7 +84,7 @@ class OzonePlatformGbm : public OzonePlatform {
+     return cursor_factory_ozone_.get();
+   }
+   virtual GpuPlatformSupport* GetGpuPlatformSupport() OVERRIDE {
+-    return gpu_platform_support_.get()
++    return gpu_platform_support_.get();
+   }
+   virtual GpuPlatformSupportHost* GetGpuPlatformSupportHost() OVERRIDE {
+     return gpu_platform_support_host_.get();
+@@ -102,11 +107,11 @@ class OzonePlatformGbm : public OzonePlatform {
+     surface_factory_ozone_.reset(new GbmSurfaceFactory(NULL, NULL, NULL));
+ 
+     device_manager_ = CreateDeviceManager();
+-    cursor_factory_ozone_.reset(new CursorFactoryOzone());
++    gpu_platform_support_host_.reset(new GpuPlatformSupportHostGbm());
++    cursor_factory_ozone_.reset(
++        new CursorFactoryEvdevDri(gpu_platform_support_host_.get()));
+     event_factory_ozone_.reset(new EventFactoryEvdev(
+-        NULL, device_manager_.get()));
+-
+-    gpu_platform_support_host_.reset(CreateStubGpuPlatformSupportHost());
++        cursor_factory_ozone_.get(), device_manager_.get()));
+   }
+ 
+   virtual void InitializeGPU() OVERRIDE {
+@@ -119,7 +124,8 @@ class OzonePlatformGbm : public OzonePlatform {
+                               surface_generator_->device(),
+                               screen_manager_.get()));
+ 
+-    gpu_platform_support_.reset(CreateStubGpuPlatformSupport());
++    gpu_platform_support_.reset(
++        new GpuPlatformSupportGbm(surface_factory_ozone_.get()));
+   }
+ 
+  private:
+@@ -130,11 +136,11 @@ class OzonePlatformGbm : public OzonePlatform {
+   scoped_ptr<DeviceManager> device_manager_;
+ 
+   scoped_ptr<GbmSurfaceFactory> surface_factory_ozone_;
+-  scoped_ptr<CursorFactoryOzone> cursor_factory_ozone_;
++  scoped_ptr<CursorFactoryEvdevDri> cursor_factory_ozone_;
+   scoped_ptr<EventFactoryEvdev> event_factory_ozone_;
+ 
+-  scoped_ptr<GpuPlatformSupport> gpu_platform_support_;
+-  scoped_ptr<GpuPlatformSupportHost> gpu_platform_support_host_;
++  scoped_ptr<GpuPlatformSupportGbm> gpu_platform_support_;
++  scoped_ptr<GpuPlatformSupportHostGbm> gpu_platform_support_host_;
+ 
+   DISALLOW_COPY_AND_ASSIGN(OzonePlatformGbm);
+ };
+diff --git a/ui/ozone/platform/dri/scanout_surface.h b/ui/ozone/platform/dri/scanout_surface.h
+index d362ae1..267911f 100644
+--- a/ui/ozone/platform/dri/scanout_surface.h
++++ b/ui/ozone/platform/dri/scanout_surface.h
+@@ -70,6 +70,9 @@ class ScanoutSurface {
+ 
+   // Returns the surface size.
+   virtual gfx::Size Size() const = 0;
++
++  // Returns the stride of the current backbuffer.
++  virtual uint32_t GetStride() const = 0;
+ };
+ 
+ class ScanoutSurfaceGenerator {

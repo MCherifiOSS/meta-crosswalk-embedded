@@ -1,0 +1,546 @@
+commit ad0ee88c874b95a294874b712a675ad924c01024
+Author: Tiago Vignatti <tiago.vignatti@intel.com>
+Date:   Mon Jul 21 16:06:19 2014 -0300
+
+    runtime: Add aura-only native support
+    
+    This CL brings aura-only native support for the browser runtime, where views
+    toolkit dependency is opt out. This is particularly useful for embedded and
+    limited systems (-Dembedded=1), where the runtime is used always as a
+    fullscreen application to the host window system. This is aimed to work with
+    Ozone DRI or GBM implementations.
+    
+    Testing was performed on Ubuntu Linux 12.04 platform.
+    
+    TEST= $ python xwalk/gyp_xwalk -Dchromeos=0 -Duse_ozone=1 -Dembedded=1 -Duse_udev=1 -Dozone_platform_gbm=1 -Ddisable_nacl=1
+          $ ninja -j16 -C out/Release xwalk
+          $ ./out/Release/xwalk --no-sandbox --ozone-platform=gbm http://hexgl.bkcore.com/play/
+
+diff --git a/xwalk/runtime/browser/runtime.cc b/xwalk/runtime/browser/runtime.cc
+index 929a474..c63c055 100644
+--- a/xwalk/runtime/browser/runtime.cc
++++ b/xwalk/runtime/browser/runtime.cc
+@@ -254,12 +254,14 @@ void Runtime::DeactivateContents(content::WebContents* contents) {
+   contents->GetRenderViewHost()->Blur();
+ }
+ 
++#if defined(TOOLKIT_VIEWS)
+ content::ColorChooser* Runtime::OpenColorChooser(
+     content::WebContents* web_contents,
+     SkColor initial_color,
+     const std::vector<content::ColorSuggestion>& suggestions) {
+   return xwalk::ShowColorChooser(web_contents, initial_color);
+ }
++#endif
+ 
+ void Runtime::RunFileChooser(
+     content::WebContents* web_contents,
+diff --git a/xwalk/runtime/browser/runtime.h b/xwalk/runtime/browser/runtime.h
+index 51be3f3..bb7e91a 100644
+--- a/xwalk/runtime/browser/runtime.h
++++ b/xwalk/runtime/browser/runtime.h
+@@ -20,7 +20,9 @@
+ #include "ui/gfx/image/image.h"
+ 
+ namespace content {
++#if defined(TOOLKIT_VIEWS)
+ class ColorChooser;
++#endif
+ struct FileChooserParams;
+ class RenderProcessHost;
+ class SiteInstance;
+@@ -119,10 +121,12 @@ class Runtime : public content::WebContentsDelegate,
+   virtual void HandleKeyboardEvent(
+       content::WebContents* source,
+       const content::NativeWebKeyboardEvent& event) OVERRIDE;
++#if defined(TOOLKIT_VIEWS)
+   virtual content::ColorChooser* OpenColorChooser(
+       content::WebContents* web_contents,
+       SkColor initial_color,
+       const std::vector<content::ColorSuggestion>& suggestions) OVERRIDE;
++#endif
+   virtual void RunFileChooser(
+       content::WebContents* web_contents,
+       const content::FileChooserParams& params) OVERRIDE;
+diff --git a/xwalk/runtime/browser/ui/native_app_window_aura.cc b/xwalk/runtime/browser/ui/native_app_window_aura.cc
+new file mode 100644
+index 0000000..23f2fdc
+--- /dev/null
++++ b/xwalk/runtime/browser/ui/native_app_window_aura.cc
+@@ -0,0 +1,324 @@
++// Copyright (c) 2014 Intel Corporation. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "xwalk/runtime/browser/ui/native_app_window_aura.h"
++
++#include "content/public/browser/web_contents.h"
++#include "content/browser/web_contents/web_contents_view.h"
++#include "ui/aura/client/aura_constants.h"
++#include "ui/wm/core/default_activation_client.h"
++#include "ui/aura/client/default_capture_client.h"
++#include "ui/aura/env.h"
++#include "ui/aura/layout_manager.h"
++#include "ui/aura/test/test_focus_client.h"
++#include "ui/aura/test/test_screen.h"
++#include "ui/aura/test/test_window_tree_client.h"
++#include "ui/aura/window.h"
++#include "ui/aura/window_event_dispatcher.h"
++#include "ui/base/cursor/cursor.h"
++#include "ui/base/cursor/image_cursors.h"
++#include "ui/base/ime/input_method.h"
++#include "ui/base/ime/input_method_delegate.h"
++#include "ui/base/ime/input_method_factory.h"
++#include "ui/gfx/screen.h"
++#include "ui/wm/core/cursor_manager.h"
++#include "ui/wm/core/native_cursor_manager.h"
++#include "ui/wm/core/native_cursor_manager_delegate.h"
++
++
++namespace xwalk {
++
++const int kDefaultTestWindowWidthDip = 1366;
++const int kDefaultTestWindowHeightDip = 769;
++
++namespace {
++
++class FillLayout : public aura::LayoutManager {
++ public:
++  explicit FillLayout(aura::Window* root)
++      : root_(root) {
++  }
++
++  virtual ~FillLayout() {}
++
++ private:
++  // aura::LayoutManager:
++  virtual void OnWindowResized() OVERRIDE {
++  }
++
++  virtual void OnWindowAddedToLayout(aura::Window* child) OVERRIDE {
++    child->SetBounds(root_->bounds());
++  }
++
++  virtual void OnWillRemoveWindowFromLayout(aura::Window* child) OVERRIDE {
++  }
++
++  virtual void OnWindowRemovedFromLayout(aura::Window* child) OVERRIDE {
++  }
++
++  virtual void OnChildWindowVisibilityChanged(aura::Window* child,
++                                              bool visible) OVERRIDE {
++  }
++
++  virtual void SetChildBounds(aura::Window* child,
++                              const gfx::Rect& requested_bounds) OVERRIDE {
++    SetChildBoundsDirect(child, requested_bounds);
++  }
++
++  aura::Window* root_;
++
++  DISALLOW_COPY_AND_ASSIGN(FillLayout);
++};
++
++// Stolen from app_shell.
++// A class that bridges the gap between CursorManager and Aura. It borrows
++// heavily from AshNativeCursorManager.
++class ShellNativeCursorManager : public wm::NativeCursorManager {
++ public:
++  explicit ShellNativeCursorManager(aura::WindowTreeHost* host)
++      : host_(host),
++        image_cursors_(new ui::ImageCursors) {}
++  virtual ~ShellNativeCursorManager() {}
++
++  // wm::NativeCursorManager overrides.
++  virtual void SetDisplay(
++      const gfx::Display& display,
++      wm::NativeCursorManagerDelegate* delegate) OVERRIDE {
++    if (image_cursors_->SetDisplay(display, display.device_scale_factor()))
++      SetCursor(delegate->GetCursor(), delegate);
++  }
++
++  virtual void SetCursor(
++      gfx::NativeCursor cursor,
++      wm::NativeCursorManagerDelegate* delegate) OVERRIDE {
++    image_cursors_->SetPlatformCursor(&cursor);
++    cursor.set_device_scale_factor(image_cursors_->GetScale());
++    delegate->CommitCursor(cursor);
++
++    if (delegate->IsCursorVisible())
++      ApplyCursor(cursor);
++  }
++
++  virtual void SetVisibility(
++      bool visible,
++      wm::NativeCursorManagerDelegate* delegate) OVERRIDE {
++    delegate->CommitVisibility(visible);
++
++    if (visible) {
++      SetCursor(delegate->GetCursor(), delegate);
++    } else {
++      gfx::NativeCursor invisible_cursor(ui::kCursorNone);
++      image_cursors_->SetPlatformCursor(&invisible_cursor);
++      ApplyCursor(invisible_cursor);
++    }
++  }
++
++  virtual void SetCursorSet(
++      ui::CursorSetType cursor_set,
++      wm::NativeCursorManagerDelegate* delegate) OVERRIDE {
++    image_cursors_->SetCursorSet(cursor_set);
++    delegate->CommitCursorSet(cursor_set);
++    if (delegate->IsCursorVisible())
++      SetCursor(delegate->GetCursor(), delegate);
++  }
++
++  virtual void SetMouseEventsEnabled(
++      bool enabled,
++      wm::NativeCursorManagerDelegate* delegate) OVERRIDE {
++    delegate->CommitMouseEventsEnabled(enabled);
++    SetVisibility(delegate->IsCursorVisible(), delegate);
++  }
++
++ private:
++  // Sets |cursor| as the active cursor within Aura.
++  void ApplyCursor(gfx::NativeCursor cursor) {
++    host_->SetCursor(cursor);
++  }
++
++  aura::WindowTreeHost* host_;  // Not owned.
++
++  scoped_ptr<ui::ImageCursors> image_cursors_;
++
++  DISALLOW_COPY_AND_ASSIGN(ShellNativeCursorManager);
++};
++
++class MinimalInputEventFilter : public ui::internal::InputMethodDelegate,
++                                public ui::EventHandler {
++ public:
++  explicit MinimalInputEventFilter(aura::WindowTreeHost* host)
++      : host_(host),
++        input_method_(ui::CreateInputMethod(this,
++                                            gfx::kNullAcceleratedWidget)) {
++    input_method_->Init(true);
++    host_->window()->AddPreTargetHandler(this);
++    host_->window()->SetProperty(aura::client::kRootWindowInputMethodKey,
++                                 input_method_.get());
++  }
++
++  virtual ~MinimalInputEventFilter() {
++    host_->window()->RemovePreTargetHandler(this);
++    host_->window()->SetProperty(aura::client::kRootWindowInputMethodKey,
++                                 static_cast<ui::InputMethod*>(NULL));
++  }
++
++ private:
++  // ui::EventHandler:
++  virtual void OnKeyEvent(ui::KeyEvent* event) OVERRIDE {
++    // See the comment in InputMethodEventFilter::OnKeyEvent() for details.
++    if (event->IsTranslated()) {
++      event->SetTranslated(false);
++    } else {
++      if (input_method_->DispatchKeyEvent(*event))
++        event->StopPropagation();
++    }
++  }
++
++  // ui::internal::InputMethodDelegate:
++  virtual bool DispatchKeyEventPostIME(const ui::KeyEvent& event) OVERRIDE {
++    // See the comment in InputMethodEventFilter::DispatchKeyEventPostIME() for
++    // details.
++    ui::KeyEvent aura_event(event);
++    aura_event.SetTranslated(true);
++    ui::EventDispatchDetails details =
++        host_->dispatcher()->OnEventFromSource(&aura_event);
++    return aura_event.handled() || details.dispatcher_destroyed;
++  }
++
++  aura::WindowTreeHost* host_;
++  scoped_ptr<ui::InputMethod> input_method_;
++
++  DISALLOW_COPY_AND_ASSIGN(MinimalInputEventFilter);
++};
++
++}
++
++// mimicking Shell::ShellPlatformDataAura
++NativeAppWindowAura::NativeAppWindowAura(
++    const NativeAppWindow::CreateParams& create_params)
++  : web_contents_(create_params.web_contents) {
++  aura::Env::CreateInstance(true);
++  const gfx::Size bounds =
++      gfx::Size(kDefaultTestWindowWidthDip, kDefaultTestWindowHeightDip);
++  host_.reset(aura::WindowTreeHost::Create(gfx::Rect(bounds)));
++  host_->InitHost();
++  host_->window()->SetLayoutManager(new FillLayout(host_->window()));
++
++  focus_client_.reset(new aura::test::TestFocusClient());
++  aura::client::SetFocusClient(host_->window(), focus_client_.get());
++
++  new wm::DefaultActivationClient(host_->window());
++  capture_client_.reset(
++      new aura::client::DefaultCaptureClient(host_->window()));
++  window_tree_client_.reset(
++      new aura::test::TestWindowTreeClient(host_->window()));
++  ime_filter_.reset(new MinimalInputEventFilter(host_.get()));
++
++  cursor_manager_.reset(
++      new wm::CursorManager(scoped_ptr<wm::NativeCursorManager>(
++          new ShellNativeCursorManager(host_.get()))));
++  cursor_manager_->SetDisplay(
++      gfx::Screen::GetNativeScreen()->GetPrimaryDisplay());
++  cursor_manager_->SetCursor(ui::kCursorPointer);
++  aura::client::SetCursorClient(host_->window(), cursor_manager_.get());
++
++  //web_contents_->SetDelegate();
++
++  // mimicking Shell::PlatformSetContents
++  aura::Window* content = web_contents_->GetNativeView();
++  aura::Window* parent = host_->window();
++  if (parent->Contains(content))
++    return;
++  parent->AddChild(content);
++  content->Show();
++
++  web_contents_->Focus();
++}
++
++NativeAppWindowAura::~NativeAppWindowAura() {
++  aura::Env::DeleteInstance();
++}
++
++void NativeAppWindowAura::Initialize() {
++}
++
++gfx::NativeWindow NativeAppWindowAura::GetNativeWindow() const {
++  return NULL;
++}
++
++void NativeAppWindowAura::UpdateIcon(const gfx::Image& icon) {
++}
++
++void NativeAppWindowAura::UpdateTitle(const base::string16& title) {
++}
++
++gfx::Rect NativeAppWindowAura::GetRestoredBounds() const {
++  return gfx::Rect();
++}
++
++gfx::Rect NativeAppWindowAura::GetBounds() const {
++  return host_->GetBounds();
++}
++
++void NativeAppWindowAura::SetBounds(const gfx::Rect& bounds) {
++  host_->SetBounds(bounds);
++}
++
++void NativeAppWindowAura::Focus() {
++}
++
++void NativeAppWindowAura::Show() {
++  host_->Show();
++}
++
++void NativeAppWindowAura::Hide() {
++  host_->Hide();
++}
++
++void NativeAppWindowAura::Maximize() {
++}
++
++void NativeAppWindowAura::Minimize() {
++}
++
++void NativeAppWindowAura::SetFullscreen(bool fullscreen) {
++}
++
++void NativeAppWindowAura::Restore() {
++}
++
++void NativeAppWindowAura::FlashFrame(bool flash) {
++}
++
++void NativeAppWindowAura::Close() {
++}
++
++bool NativeAppWindowAura::IsActive() const {
++  return true;
++}
++
++bool NativeAppWindowAura::IsMaximized() const {
++  return true;
++}
++
++bool NativeAppWindowAura::IsMinimized() const {
++  return false;
++}
++
++bool NativeAppWindowAura::IsFullscreen() const {
++  return true;
++}
++
++// static
++NativeAppWindow* NativeAppWindow::Create(
++    const NativeAppWindow::CreateParams& create_params) {
++  return new NativeAppWindowAura(create_params);
++}
++
++// static
++void NativeAppWindow::Initialize() {
++  aura::TestScreen* screen = aura::TestScreen::Create(gfx::Size());
++  gfx::Screen::SetScreenInstance(gfx::SCREEN_TYPE_NATIVE, screen);
++}
++
++}  // namespace xwalk
+diff --git a/xwalk/runtime/browser/ui/native_app_window_aura.h b/xwalk/runtime/browser/ui/native_app_window_aura.h
+new file mode 100644
+index 0000000..24c839b
+--- /dev/null
++++ b/xwalk/runtime/browser/ui/native_app_window_aura.h
+@@ -0,0 +1,81 @@
++// Copyright (c) 2014 Intel Corporation. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef XWALK_RUNTIME_BROWSER_UI_NATIVE_APP_WINDOW_AURA_H_
++#define XWALK_RUNTIME_BROWSER_UI_NATIVE_APP_WINDOW_AURA_H_
++
++#include <string>
++
++#include "base/memory/scoped_ptr.h"
++#include "ui/aura/window_tree_host.h"
++#include "xwalk/runtime/browser/ui/native_app_window.h"
++
++namespace aura {
++namespace client {
++class DefaultCaptureClient;
++class FocusClient;
++class WindowTreeClient;
++}
++}
++
++namespace gfx {
++class Size;
++}
++
++namespace ui {
++class EventHandler;
++}
++
++namespace wm {
++class CursorManager;
++}
++
++namespace xwalk {
++
++class TopViewLayout;
++
++class NativeAppWindowAura : public NativeAppWindow {
++ public:
++  explicit NativeAppWindowAura(const NativeAppWindow::CreateParams& params);
++  virtual ~NativeAppWindowAura();
++
++  virtual void Initialize();
++
++  // NativeAppWindow implementation.
++  virtual gfx::NativeWindow GetNativeWindow() const OVERRIDE;
++  virtual void UpdateIcon(const gfx::Image& icon) OVERRIDE;
++  virtual void UpdateTitle(const base::string16& title) OVERRIDE;
++  virtual gfx::Rect GetRestoredBounds() const OVERRIDE;
++  virtual gfx::Rect GetBounds() const OVERRIDE;
++  virtual void SetBounds(const gfx::Rect& bounds) OVERRIDE;
++  virtual void Focus() OVERRIDE;
++  virtual void Show() OVERRIDE;
++  virtual void Hide() OVERRIDE;
++  virtual void Maximize() OVERRIDE;
++  virtual void Minimize() OVERRIDE;
++  virtual void SetFullscreen(bool fullscreen) OVERRIDE;
++  virtual void Restore() OVERRIDE;
++  virtual void FlashFrame(bool flash) OVERRIDE;
++  virtual void Close() OVERRIDE;
++  virtual bool IsActive() const OVERRIDE;
++  virtual bool IsMaximized() const OVERRIDE;
++  virtual bool IsMinimized() const OVERRIDE;
++  virtual bool IsFullscreen() const OVERRIDE;
++
++ private:
++  scoped_ptr<aura::WindowTreeHost> host_;
++  scoped_ptr<aura::client::FocusClient> focus_client_;
++  scoped_ptr<wm::CursorManager> cursor_manager_;
++  scoped_ptr<aura::client::DefaultCaptureClient> capture_client_;
++  scoped_ptr<aura::client::WindowTreeClient> window_tree_client_;
++  scoped_ptr<ui::EventHandler> ime_filter_;
++
++  content::WebContents* web_contents_;
++
++  DISALLOW_COPY_AND_ASSIGN(NativeAppWindowAura);
++};
++
++}  // namespace xwalk
++
++#endif  // XWALK_RUNTIME_BROWSER_UI_NATIVE_APP_WINDOW_AURA_H_
+diff --git a/xwalk/runtime/browser/xwalk_browser_main_parts.cc b/xwalk/runtime/browser/xwalk_browser_main_parts.cc
+index f000167..ef8fcaf 100644
+--- a/xwalk/runtime/browser/xwalk_browser_main_parts.cc
++++ b/xwalk/runtime/browser/xwalk_browser_main_parts.cc
+@@ -38,10 +38,13 @@
+ #include "xwalk/runtime/common/xwalk_switches.h"
+ 
+ #if defined(USE_AURA) && defined(USE_X11)
+-#include "ui/base/ime/input_method_initializer.h"
+ #include "ui/events/x/touch_factory_x11.h"
+ #endif
+ 
++#if !defined(OS_CHROMEOS) && defined(USE_AURA) && defined(OS_LINUX)
++#include "ui/base/ime/input_method_initializer.h"
++#endif
++
+ namespace {
+ 
+ // FIXME: Compare with method in startup_browser_creator.cc.
+@@ -126,8 +129,8 @@ void XWalkBrowserMainParts::PostMainMessageLoopStart() {
+ }
+ 
+ void XWalkBrowserMainParts::PreEarlyInitialization() {
+-#if defined(USE_AURA) && defined(USE_X11)
+-    ui::InitializeInputMethodForTesting();
++#if !defined(OS_CHROMEOS) && defined(USE_AURA) && defined(OS_LINUX)
++  ui::InitializeInputMethodForTesting();
+ #endif
+ }
+ 
+diff --git a/xwalk/xwalk.gyp b/xwalk/xwalk.gyp
+index 8029ea7..6c1e3f4 100644
+--- a/xwalk/xwalk.gyp
++++ b/xwalk/xwalk.gyp
+@@ -199,6 +199,8 @@
+         'runtime/browser/ui/color_chooser_mac.cc',
+         'runtime/browser/ui/native_app_window.cc',
+         'runtime/browser/ui/native_app_window.h',
++        'runtime/browser/ui/native_app_window_aura.cc',
++        'runtime/browser/ui/native_app_window_aura.h',
+         'runtime/browser/ui/native_app_window_android.cc',
+         'runtime/browser/ui/native_app_window_mac.h',
+         'runtime/browser/ui/native_app_window_mac.mm',
+@@ -382,10 +384,21 @@
+             '../ui/views/views.gyp:views_test_support',
+             '../ui/resources/ui_resources.gyp:ui_resources',
+           ],
++          'sources/': [
++            ['exclude', 'runtime/browser/ui/native_app_window_aura.cc'],
++          ],
++        }, {
++          'sources/': [
++            ['exclude', 'runtime/browser/ui/native_app_window_views.cc'],
++            ['exclude', 'runtime/browser/ui/xwalk_views_delegate.cc'],
++            ['exclude', 'runtime/browser/ui/color_chooser_aura.cc'],
++          ],
+         }],  # toolkit_views==1
+         ['use_aura==1', {
+           'dependencies': [
+             '../ui/aura/aura.gyp:aura',
++            '../ui/aura/aura.gyp:aura_test_support',
++            '../ui/wm/wm.gyp:wm'
+           ],
+         }, {  # use_aura==0
+           'sources/': [

@@ -1,0 +1,15 @@
+diff --git a/third_party/webrtc/base/base.gyp b/third_party/webrtc/base/base.gyp
+index 330ea82..fa524cc 100644
+--- a/third_party/webrtc/base/base.gyp
++++ b/third_party/webrtc/base/base.gyp
+@@ -573,10 +573,6 @@
+               '-lcrypto',
+               '-ldl',
+               '-lrt',
+-              '-lXext',
+-              '-lX11',
+-              '-lXcomposite',
+-              '-lXrender',
+               '<!@(<(pkg-config) --libs-only-l nss | sed -e "s/-lssl3//")',
+             ],
+           },
