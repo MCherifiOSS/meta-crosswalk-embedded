@@ -8,26 +8,23 @@ SRC_URI += "\
 
 DEPENDS_remove = "gtk+"
 DEPENDS_remove = "libxss"
-DEPENDS += "mesa"
+DEPENDS += "virtual/egl"
 
 RDEPENDS_crosswalk += "\
-    mesa-driver-i915 \
-    mesa-driver-i965 \
+    libdricore \
     libegl-mesa \
     libgbm \
     libgl-mesa \
     libglapi \
     libgles1-mesa \
     libgles2-mesa \
+    mesa-driver-i915 \
+    mesa-driver-i965 \
     "
 
 DEFAULT_CONFIGURATION += "\
-    -Dchromeos=0 \
     -Dembedded=1 \
-    -Dozone_platform_dri=1 \
-    -Dozone_platform_gbm=1 \
     -Dozone_platform_wayland=0 \
     -Duse_ozone=1 \
     -Duse_udev=1 \
-    -Duse_x11=0 \
     "
