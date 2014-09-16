@@ -24,6 +24,7 @@ RDEPENDS_crosswalk += "\
 
 DEFAULT_CONFIGURATION += "\
     -Dembedded=1 \
+    -Dozone_platform_gbm=1 \
     -Dozone_platform_wayland=0 \
     -Duse_ozone=1 \
     -Duse_udev=1 \
