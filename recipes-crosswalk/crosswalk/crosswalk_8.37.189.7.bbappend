@@ -17,7 +17,6 @@ RDEPENDS_crosswalk += "\
     libglapi \
     libgles1-mesa \
     libgles2-mesa \
-    libosmesa \
     mesa-driver-i915 \
     mesa-driver-i965 \
     "
