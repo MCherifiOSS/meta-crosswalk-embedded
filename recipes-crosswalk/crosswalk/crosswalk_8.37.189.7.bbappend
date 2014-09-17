@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/crosswalk"
+FILESEXTRAPATHS_prepend := "${THISDIR}/crosswalk:"
 
 SRC_URI += "\
     file://do_not_link_webrtc_with_x11.patch;patch=1 \
@@ -11,13 +11,13 @@ DEPENDS_remove = "libxss"
 DEPENDS += "virtual/egl"
 
 RDEPENDS_crosswalk += "\
-    libdricore \
     libegl-mesa \
     libgbm \
     libgl-mesa \
     libglapi \
     libgles1-mesa \
     libgles2-mesa \
+    libosmesa \
     mesa-driver-i915 \
     mesa-driver-i965 \
     "
