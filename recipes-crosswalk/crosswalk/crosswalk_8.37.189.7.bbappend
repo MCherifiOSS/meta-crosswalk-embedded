@@ -4,6 +4,7 @@ SRC_URI += "\
     file://do_not_link_webrtc_with_x11.patch;patch=1 \
     file://embedded_chromium_crosswalk.patch;patch=1 \
     file://embedded_crosswalk.patch;patch=1 \
+    file://xwalk_host_window_bounds.patch;patch=1 \
     "
 
 DEPENDS_remove = "gtk+"
