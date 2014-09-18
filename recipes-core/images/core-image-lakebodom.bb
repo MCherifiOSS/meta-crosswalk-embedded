@@ -8,6 +8,7 @@ DISTRO_FEATURES += "pulseaudio opengl wifi pci"
 
 IMAGE_INSTALL = "\
     packagegroup-core-boot \
+    liberation-fonts \
     connman \
     connman-client \
     kernel-modules \
