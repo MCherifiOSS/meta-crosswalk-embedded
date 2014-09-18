@@ -5,6 +5,7 @@ SRC_URI += "\
     file://embedded_chromium_crosswalk.patch;patch=1 \
     file://embedded_crosswalk.patch;patch=1 \
     file://xwalk_host_window_bounds.patch;patch=1 \
+    file://xwalk \
     "
 
 DEPENDS_remove = "gtk+"
@@ -29,3 +30,11 @@ DEFAULT_CONFIGURATION += "\
     -Duse_ozone=1 \
     -Duse_udev=1 \
     "
+
+do_install_append() {
+    # Remove the symlink and replace with the wrapper
+    rm -f ${D}${bindir}/xwalk
+
+    install -d ${D}${bindir}/
+    install -m 0755 ${WORKDIR}/xwalk ${D}${bindir}/xwalk
+}
