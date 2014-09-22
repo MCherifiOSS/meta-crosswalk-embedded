@@ -15,7 +15,6 @@ DEPENDS += "virtual/egl"
 RDEPENDS_crosswalk += "\
     libegl-mesa \
     libgbm \
-    libgl-mesa \
     libglapi \
     libgles1-mesa \
     libgles2-mesa \
