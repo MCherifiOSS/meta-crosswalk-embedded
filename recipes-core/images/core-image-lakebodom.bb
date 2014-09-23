@@ -4,8 +4,6 @@ LICENSE = "BSD"
 
 IMAGE_FEATURES += "ssh-server-dropbear hwcodecs"
 
-DISTRO_FEATURES += "pulseaudio opengl wifi pci"
-
 CROSSWALK_EXAMPLES = "\
     crosswalk-example \
     emberwind \
