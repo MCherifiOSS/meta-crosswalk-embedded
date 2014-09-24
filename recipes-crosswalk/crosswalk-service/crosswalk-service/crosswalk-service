@@ -1,0 +1,39 @@
+#!/bin/sh
+
+DAEMON=/usr/bin/xwalk
+PIDFILE=/var/run/xwalk.pid
+DESC="Crosswalk"
+
+set -e
+
+do_start() {
+	EXTRA_PARAM="/usr/lib/hexgl/index.html"
+	$DAEMON $EXTRA_PARAM
+}
+
+do_stop() {
+	start-stop-daemon --stop --name xwalk --quiet
+}
+
+case "$1" in
+  start)
+	echo "Starting $DESC"
+	do_start
+	;;
+  stop)
+	echo "Stopping $DESC"
+	do_stop
+	;;
+  restart|force-reload)
+	echo "Restarting $DESC"
+	do_stop
+	sleep 1
+	do_start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
