@@ -27,7 +27,6 @@ IMAGE_INSTALL = "\
     linux-firmware-iwlwifi-7260-7 \
     wireless-tools \
     wpa-supplicant \
-    ${CROSSWALK_EXAMPLES} \
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 
