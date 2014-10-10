@@ -59,9 +59,11 @@ are and then jump to its build environment:
 
   ```
 
-You had no conf/local.conf file. A configuration file has therefore been
-created for you with some default values but we need still to add the
-meta-cross and meta-lakebodom layers in conf/bblayers.conf:
+You had no conf/local.conf file so a configuration file has therefore been
+created for you with some default values, but we need still to add the
+meta-cross and meta-lakebodom layers in conf/bblayers.conf - mind to change
+the lines below with the **full path of the directory your are cloning the
+repos** (in our case it was /media/yocto/) :
 
   ```
 BBLAYERS ?= " \
@@ -99,11 +101,11 @@ with the images built in inside:
   $ ls tmp/deploy/images/genericx86-64/*.hddimg
   $ tmp/deploy/images/genericx86-64/core-image-lakebodom-genericx86-64-20141009113028.hddimg
   $ tmp/deploy/images/genericx86-64/core-image-lakebodom-genericx86-64.hddimg
-  $ cd tmp/deploy/images/genericx86-64/
   ```
 
 Now flash it and boot in your system:
   ```
+  $ cd tmp/deploy/images/genericx86-64/
   $ sudo dd if=core-image-lakebodom-genericx86-64.hddimg of=/dev/sdd
   $ sync 
   $ sudo eject /dev/sdd
@@ -111,7 +113,8 @@ Now flash it and boot in your system:
 
 ## Contributing
 
-TODO
+Start discussions by opening issues in github (right menu) and after agreed
+the necessary changes with the developers, send a pull request.
 
 ## License
 
