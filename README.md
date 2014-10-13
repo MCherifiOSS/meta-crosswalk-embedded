@@ -75,6 +75,13 @@ BBLAYERS ?= " \
   "
   ```
 
+In the conf/local.conf file, set the distro variable from the default (usually "poky")
+to "lakebodom", which stands for our custom Yocto distribution:
+
+  ```
+DISTRO ?= "lakebodom"
+  ```
+
 then, set in conf/local.conf the genericx86-64 machine (you could try a
 different architecture but we haven't yet):
 
