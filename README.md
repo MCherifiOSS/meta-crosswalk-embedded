@@ -1,14 +1,17 @@
 # Introduction
 
-Yocto Yocto Crosswalk Embedded is the minimal Linux distribution that boots a fully-fledged Web
-application.
+Yocto Crosswalk Embedded is the minimal Linux platform that boots a
+fully-fledged Web application.
 
 This repository is actually a Yocto layer and groups all the needed components
-that form Yocto Yocto Crosswalk Embedded, featuring mostly Crosswalk Application run-time and
+that form Yocto Crosswalk Embedded, featuring mostly Crosswalk Application run-time and
 Chromium. In particular Chromium is using Ozone-GBM platform and therefore
 does not rely on any Linux traditional window system like X11, Wayland, etc,
 neither graphics toolkits like EFL, Qt. It's a pretty simple and new software
-stack that the main motivation is to leverage the Web as application platform.
+stack that the main motivation is to leverage the Web platform (HTML5, CSS,
+JavaScript and more) as the
+application platform. You may want to use Yocto Crosswalk Embedded as a backbone for creating a real Linux distribution to enable IoT, Digital Signage or any other
+embedded use case.
 
 # Contents
 
@@ -19,11 +22,11 @@ stack that the main motivation is to leverage the Web as application platform.
 
 # Design
 
-Yocto + Chromium + Ozone-GBM + Crosswalk = Web app
+![Alt text](https://raw.github.com/tiagovignatti/misc/master/yoctocrosswalkembedded-arch.png "Yocto Crosswalk Embedded architecture overview")
 
 # Howto
 
-This guide will help you to build a bootable image with Yocto Yocto Crosswalk Embedded. Most of
+This guide will help you to build a bootable image with Yocto Crosswalk Embedded. Most of
 the toolchain needed to build comes from Yocto Poky and it's expected to use
 just a few of your system's dependencies. We use Ubuntu 14.04 LTS (Trusty
 Tahr) in particular, but there's no reason to not use any other different
