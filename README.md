@@ -128,4 +128,4 @@ the necessary changes with the developers, send a pull request.
 
 ## License
 
-TODO
+Yocto Crosswalk Embedded uses the BSD license (check the LICENSE file in the project).
