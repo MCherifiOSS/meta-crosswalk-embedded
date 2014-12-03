@@ -26,6 +26,11 @@ embedded use case.
 
 # Howto
 
+**Important caveat: Yocto Crosswalk Embedded at the moment works only for x86
+(Intel) and modern hardware containing GPU due the Chromium Ozone-GBM
+architecture. That said, we don't have plans to extend it to any other category of
+devices. For testing, development and deployment we recommend the [MinnowBoard MAX](http://www.minnowboard.org/meet-minnowboard-max/)**.
+
 This guide will help you to build a bootable image with Yocto Crosswalk Embedded. Most of
 the toolchain needed to build comes from Yocto Poky and it's expected to use
 just a few of your system's dependencies. We use Ubuntu 14.04 LTS (Trusty
@@ -65,7 +70,7 @@ are and then jump to its build environment:
 You had no conf/local.conf file so a configuration file has therefore been
 created for you with some default values, but we need still to add the
 meta-cross and meta-crosswalk-embedded layers in conf/bblayers.conf - mind to change
-the lines below with the **full path of the directory your are cloning the
+the lines below with the **full path of the directory you are cloning the
 repos** (in our case it was /media/yocto/) :
 
   ```
