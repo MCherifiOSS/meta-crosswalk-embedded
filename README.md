@@ -1,17 +1,17 @@
 # Introduction
 
-Yocto Crosswalk Embedded is the minimal Linux platform that boots a
+Embedded Crosswalk Project (ECP) is the minimal Linux platform that boots a
 fully-fledged Web application.
 
 This repository is actually a Yocto layer and groups all the needed components
-that form Yocto Crosswalk Embedded, featuring mostly Crosswalk Application run-time and
+that form the ECP, featuring mostly Crosswalk application run-time and
 Chromium. In particular Chromium is using Ozone-GBM platform and therefore
 does not rely on any Linux traditional window system like X11, Wayland, etc,
 neither graphics toolkits like EFL, Qt. It's a pretty simple and new software
 stack that the main motivation is to leverage the Web platform (HTML5, CSS,
-JavaScript and more) as the
-application platform. You may want to use Yocto Crosswalk Embedded as a backbone for creating a real Linux distribution to enable IoT, Digital Signage or any other
-embedded use case.
+JavaScript and more) as the application platform. You may want to use the Embedded
+Crosswalk Project as a backbone for creating a real Linux distribution to
+enable IoT, Digital Signage or any other embedded use case.
 
 # Contents
 
@@ -22,16 +22,16 @@ embedded use case.
 
 # Design
 
-![Alt text](https://raw.github.com/tiagovignatti/misc/master/yoctocrosswalkembedded-arch.png "Yocto Crosswalk Embedded architecture overview")
+![Alt text](https://raw.github.com/tiagovignatti/misc/master/yoctocrosswalkembedded-arch.png "Embedded Crosswalk Project architecture overview")
 
 # Howto
 
-**Important caveat: Yocto Crosswalk Embedded at the moment works only for x86
+**Important caveat: ECP at the moment works only for x86
 (Intel) and modern hardware containing GPU due the Chromium Ozone-GBM
 architecture. That said, we don't have plans to extend it to any other category of
 devices. For testing, development and deployment we recommend the [MinnowBoard MAX](http://www.minnowboard.org/meet-minnowboard-max/)**.
 
-This guide will help you to build a bootable image with Yocto Crosswalk Embedded. Most of
+This guide will help you to build a bootable image with the Embedded Crosswalk Project. Most of
 the toolchain needed to build comes from Yocto Poky and it's expected to use
 just a few of your system's dependencies. We use Ubuntu 14.04 LTS (Trusty
 Tahr) in particular, but there's no reason to not use any other different
@@ -69,7 +69,7 @@ are and then jump to its build environment:
 
 You had no conf/local.conf file so a configuration file has therefore been
 created for you with some default values, but we need still to add the
-meta-cross and meta-crosswalk-embedded layers in conf/bblayers.conf - mind to change
+meta-crosswalk and meta-crosswalk-embedded layers in conf/bblayers.conf - mind to change
 the lines below with the **full path of the directory you are cloning the
 repos** (in our case it was /media/yocto/) :
 
@@ -133,4 +133,4 @@ the necessary changes with the developers, send a pull request.
 
 ## License
 
-Yocto Crosswalk Embedded uses the BSD license (check the LICENSE file in the project).
+Embedded Crosswalk Project (ECP) uses the BSD license (check the LICENSE file in the project).
