@@ -1,6 +1,6 @@
 # Introduction
 
-Embedded Crosswalk Project (ECP) is the minimal Linux platform that boots a
+**Embedded Crosswalk Project** (ECP) is the minimal Linux platform that boots a
 fully-fledged Web application.
 
 This repository is actually a Yocto layer and groups all the needed components
@@ -9,14 +9,17 @@ Chromium. In particular Chromium is using Ozone-GBM platform and therefore
 does not rely on any Linux traditional window system like X11, Wayland, etc,
 neither graphics toolkits like EFL, Qt. It's a pretty simple and new software
 stack that the main motivation is to leverage the Web platform (HTML5, CSS,
-JavaScript and more) as the application platform. You may want to use the Embedded
-Crosswalk Project as a backbone for creating a real Linux distribution to
-enable IoT, Digital Signage or any other embedded use case.
+JavaScript and more) as the application platform.
+
+You may want to use the Embedded Crosswalk project as a backbone for creating
+a real **Web-based Linux distribution** to enable **IoT (Internet of Things),
+Wearables, Digital Signage** or any other embedded use case.
 
 # Contents
 
   - [Design](#design) - the architecture behind
   - [Howto](#howto) - set up the system environment, build and run
+  - [Bugs](#bugs) - what's not working that we need still to catch up and improve
   - [Contributing](#contributing) - help develop and send patches
   - [License](#license)
 
@@ -42,7 +45,7 @@ Firstly, you will need anyway a couple of your distribution tools and
 development packages:
 
   ```
-  $ sudo apt-get install gawk wget git-core diffstat unzip texinfo
+  $ sudo apt-get install gawk wget git-core diffstat unzip texinfo \
 gcc-multilib build-essential chrpath libsdl1.2-dev xterm gyp
   ```
 
@@ -54,7 +57,7 @@ then download the needed stuff:
 
   $ git clone http://git.yoctoproject.org/git/poky
   $ git clone http://github.com/crosswalk-project/meta-crosswalk
-  $ git clone git@github.com:otcshare/meta-crosswalk-embedded.git # yes, you'll need permissions for this one!!!
+  $ git clone http://github.com/otcshare/meta-crosswalk-embedded
   ```
 
 now go to poky and checkout the 'dizzy' branch, which is where the new things
@@ -118,7 +121,10 @@ with the images built in inside:
   $ tmp/deploy/images/genericx86-64/core-image-crosswalk-embedded-genericx86-64.hddimg
   ```
 
-Now flash it and boot in your system:
+Make sure you have now inserted a USB flash drive, **checking the correct file
+descriptor** that Linux will be using with the `sudo fdisk -l` command. For
+example in our system it is ```/dev/sdd```, so the following is what we used to
+flash it:
   ```
   $ cd tmp/deploy/images/genericx86-64/
   $ sudo dd if=core-image-crosswalk-embedded-genericx86-64.hddimg of=/dev/sdd
@@ -126,11 +132,25 @@ Now flash it and boot in your system:
   $ sudo eject /dev/sdd
   ```
 
-## Contributing
+You are able now to boot the flash drive in your hardware and play around with
+a couple of examples such as HexGL, Emberwind, WebRTC, WebGL motion detector
+(using Web cam), Crosswalk, among others. Note that what you are seeing there
+as a "desktop" is actually the HTML5 & CSS3 window manager
+[Ventus](http://www.rlamana.es/ventus/), so don't get confused because nothing
+you see there is native but Web-based ;)
+
+# Bugs
+
+What's not working:
+
+  * Sound
+  * Touchpad
+
+# Contributing
 
 Start discussions by opening issues in github (right menu) and after agreed
 the necessary changes with the developers, send a pull request.
 
-## License
+# License
 
 Embedded Crosswalk Project (ECP) uses the BSD license (check the LICENSE file in the project).
