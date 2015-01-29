@@ -3,15 +3,15 @@
 **Embedded Crosswalk Project** (ECP) is the minimal Linux platform that boots a
 fully-fledged Web application.
 
-This repository is actually a Yocto layer and groups all the needed components
-that form the ECP, featuring mostly Crosswalk application run-time and
-Chromium. In particular Chromium is using Ozone-GBM platform and therefore
+In development terms, ECP is actually a Yocto layer where it carefully select
+components and custom configure them, featuring the Crosswalk Web runtime and
+Chromium. In particular Chromium here is using Ozone-GBM platform and therefore
 does not rely on any Linux traditional window system like X11, Wayland, etc,
 neither graphics toolkits like EFL, Qt. It's a pretty simple and new software
 stack that the main motivation is to leverage the Web platform (HTML5, CSS,
 JavaScript and more) as the application platform.
 
-You may want to use the Embedded Crosswalk project as a backbone for creating
+You may want to use the Embedded Crosswalk Project as a backbone for creating
 a real **Web-based Linux distribution** to enable **IoT (Internet of Things),
 Wearables, Digital Signage** or any other embedded use case.
 
@@ -149,7 +149,9 @@ What's not working:
 # Contributing
 
 Start discussions by opening issues in github (right menu) and after agreed
-the necessary changes with the developers, send a pull request.
+the necessary changes with the developers, send a pull request. Jump on IRC and
+chat with other developers; they hang out on Freenode in the #crosswalk channel. 
+Subscribe yourself to the [crosswalk-dev mailing list](https://lists.crosswalk-project.org/mailman/listinfo/crosswalk-dev).
 
 # License
 
