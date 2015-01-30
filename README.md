@@ -20,6 +20,7 @@ Wearables, Digital Signage** or any other embedded use case.
   - [Design](#design) - the architecture behind
   - [Howto](#howto) - set up the system environment, build and run
   - [Bugs](#bugs) - what's not working that we need still to catch up and improve
+  - [Customizing](#customizing) - boot up your own Web app and other hacking
   - [Contributing](#contributing) - help develop and send patches
   - [License](#license)
 
@@ -145,6 +146,37 @@ What's not working:
 
   * Sound
   * Touchpad
+
+# Customizing
+
+  * using your own Web app
+
+The first customization that you may want to try is boot up your own Web app
+instead the example we provide. Note that Crosswalk is a runtime not a
+regular browser, so you won't get an URL bar to load anything you want.
+Therefore, probably the easiest way ever would be make a small change at the
+"meta-crosswalk-embedded" repository:
+
+  ```
+  - Edit the file recipes-crosswalk/crosswalk/crosswalk/xwalk
+  - Replace "$@" with something like "http://www.foobar.com"
+  - Rebuild the image.
+  ```
+
+It should launch into http://www.foobar.com if the network is properly
+connected.
+ 
+   * command line access
+
+By default ECP boots straight to the app and at the moment there is no way to
+kill Crosswalk process to access the command line. Therefore, if your target
+machine boots via SYSLINUX (i.e. not via EFI), then you will have to first mount
+the USB stick in the development machine and edit `syslinux.cfg` file. In the
+`LABEL boot` session, add `systemd.unit=rescue.target` in the APPEND field.
+Doing like that will let you boot the system with systemd stopping it at
+runlevel "rescue", which doesn't bring up Crosswalk and therefore will give you
+command line access as well.
+
 
 # Contributing
 
