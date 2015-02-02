@@ -159,11 +159,11 @@ Therefore, probably the easiest way ever would be make a small change at the
 
   ```
   - Edit the file recipes-crosswalk/crosswalk/crosswalk/xwalk
-  - Replace "$@" with something like "http://www.foobar.com"
+  - Replace "$@" with something like "http://www.example.com"
   - Rebuild the image.
   ```
 
-It should launch into http://www.foobar.com if the network is properly
+It should launch into http://www.example.com if the network is properly
 connected.
  
    * command line access
