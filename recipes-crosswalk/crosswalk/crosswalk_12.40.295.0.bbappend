@@ -12,8 +12,7 @@ RDEPENDS_crosswalk += "\
     libglapi \
     libgles1-mesa \
     libgles2-mesa \
-    mesa-driver-i915 \
-    mesa-driver-i965 \
+    mesa-megadriver \
     "
 
 DEFAULT_CONFIGURATION += "\
