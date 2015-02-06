@@ -1,6 +1,9 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/crosswalk:"
 
-SRC_URI += "file://xwalk"
+SRC_URI += " \
+    file://build_fix.patch \
+    file://xwalk \
+    "
 
 DEPENDS_remove = "gtk+"
 DEPENDS_remove = "libxss"

@@ -1,0 +1,17 @@
+diff --git a/xwalk/xwalk.gyp b/xwalk/xwalk.gyp
+index 381d67a..127b6f5 100644
+--- a/xwalk/xwalk.gyp
++++ b/xwalk/xwalk.gyp
+@@ -49,10 +49,12 @@
+         '../storage/storage_browser.gyp:storage',
+         '../storage/storage_common.gyp:storage_common',
+         '../third_party/WebKit/public/blink.gyp:blink',
++        '../ui/aura/aura.gyp:aura_test_support',
+         '../ui/base/ui_base.gyp:ui_base',
+         '../ui/gl/gl.gyp:gl',
+         '../ui/shell_dialogs/shell_dialogs.gyp:shell_dialogs',
+         '../ui/snapshot/snapshot.gyp:snapshot',
++        '../ui/wm/wm.gyp:wm',
+         '../url/url.gyp:url_lib',
+         '../v8/tools/gyp/v8.gyp:v8',
+         'generate_upstream_blink_version',
