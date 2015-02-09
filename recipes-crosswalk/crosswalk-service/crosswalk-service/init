@@ -1,14 +1,13 @@
 #!/bin/sh
 
-DAEMON=/usr/bin/xwalk
+DAEMON=/usr/bin/xwalk-service
 PIDFILE=/var/run/xwalk.pid
 DESC="Crosswalk"
 
 set -e
 
 do_start() {
-	EXTRA_PARAM="/usr/lib/hexgl/index.html"
-	$DAEMON $EXTRA_PARAM
+	$DAEMON
 }
 
 do_stop() {

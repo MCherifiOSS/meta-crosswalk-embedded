@@ -3,7 +3,7 @@ Description=Crosswalk is a web runtime for ambitious HTML5 applications
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/xwalk /usr/lib/hexgl/index.html
+ExecStart=/usr/bin/xwalk-service
 
 [Install]
 WantedBy=multi-user.target
