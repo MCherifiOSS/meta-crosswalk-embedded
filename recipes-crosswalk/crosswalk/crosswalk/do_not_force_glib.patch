@@ -1,0 +1,105 @@
+diff --git a/base/BUILD.gn b/base/BUILD.gn
+index 40610ca..6bd982d 100644
+--- a/base/BUILD.gn
++++ b/base/BUILD.gn
+@@ -934,13 +934,6 @@ component("base") {
+     }
+   }
+ 
+-  if (!use_glib) {
+-    sources -= [
+-      "message_loop/message_pump_glib.cc",
+-      "message_loop/message_pump_glib.h",
+-    ]
+-  }
+-
+   configs += [ "//build/config/compiler:wexit_time_destructors" ]
+   if (is_android && !is_debug) {
+     configs -= [ "//build/config/compiler:optimize" ]
+diff --git a/base/base.gyp b/base/base.gyp
+index 57e07ff..e3e0343 100644
+--- a/base/base.gyp
++++ b/base/base.gyp
+@@ -23,10 +23,14 @@
+       'dependencies': [
+         'base_static',
+         'allocator/allocator.gyp:allocator_extension_thunks',
++        '../build/linux/system.gyp:glib',
+         '../testing/gtest.gyp:gtest_prod',
+         '../third_party/modp_b64/modp_b64.gyp:modp_b64',
+         'third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
+       ],
++      'export_dependent_settings': [
++        '../build/linux/system.gyp:glib',
++      ],
+       # TODO(gregoryd): direct_dependent_settings should be shared with the
+       #  64-bit target, but it doesn't work due to a bug in gyp
+       'direct_dependent_settings': {
+@@ -54,14 +58,6 @@
+               ['exclude', '_nss\\.cc$'],
+             ],
+         }],
+-        ['use_glib==1', {
+-          'dependencies': [
+-            '../build/linux/system.gyp:glib',
+-          ],
+-          'export_dependent_settings': [
+-            '../build/linux/system.gyp:glib',
+-          ],
+-        }],
+         ['OS == "android" and _toolset == "host"', {
+           # Always build base as a static_library for host toolset, even if
+           # we're doing a component build. Specifically, we only care about the
+@@ -675,6 +671,7 @@
+         'run_all_unittests',
+         'test_support_base',
+         'third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
++        '../build/linux/system.gyp:glib',
+         '../testing/gmock.gyp:gmock',
+         '../testing/gtest.gyp:gtest',
+         '../third_party/icu/icu.gyp:icui18n',
+@@ -732,15 +729,6 @@
+             }],
+           ],
+         }],
+-        ['use_glib == 1', {
+-          'dependencies': [
+-            '../build/linux/system.gyp:glib',
+-          ],
+-        }, {  # use_glib == 0
+-          'sources!': [
+-            'message_loop/message_pump_glib_unittest.cc',
+-          ]
+-        }],
+         ['OS == "linux" and use_allocator!="none"', {
+             'dependencies': [
+               'allocator/allocator.gyp:allocator',
+diff --git a/base/base.gypi b/base/base.gypi
+index 4f94e0d..8694523 100644
+--- a/base/base.gypi
++++ b/base/base.gypi
+@@ -752,11 +752,6 @@
+                 'atomicops_internals_x86_gcc.cc',
+               ],
+           }],
+-          ['<(use_glib)==0 or >(nacl_untrusted_build)==1', {
+-              'sources!': [
+-                'message_loop/message_pump_glib.cc',
+-              ],
+-          }],
+           ['(OS != "linux" and <(os_bsd) != 1 and OS != "android") or >(nacl_untrusted_build)==1', {
+               'sources!': [
+                 # Not automatically excluded by the *linux.cc rules.
+diff --git a/build/common.gypi b/build/common.gypi
+index 51b1f12..bb6165c 100644
+--- a/build/common.gypi
++++ b/build/common.gypi
+@@ -703,7 +703,7 @@
+         }],
+ 
+         # Flags to use glib.
+-        ['OS=="win" or OS=="mac" or OS=="ios" or OS=="android"', {
++        ['OS=="win" or OS=="mac" or OS=="ios" or OS=="android" or use_ozone==1', {
+           'use_glib%': 0,
+         }, {
+           'use_glib%': 1,

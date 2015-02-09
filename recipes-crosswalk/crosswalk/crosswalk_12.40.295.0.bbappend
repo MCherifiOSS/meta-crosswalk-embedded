@@ -2,6 +2,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/crosswalk:"
 
 SRC_URI += " \
     file://build_fix.patch \
+    file://do_not_force_glib.patch \
     file://xwalk \
     "
 
