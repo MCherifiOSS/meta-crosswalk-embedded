@@ -14,4 +14,4 @@ SRC_URI += "\
     file://silent.cfg \
     "
 
-module_autoload_iwlwifi = "iwlwifi"
+KERNEL_MODULE_AUTOLOAD += "iwlwifi"
