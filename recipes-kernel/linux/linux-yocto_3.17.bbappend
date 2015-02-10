@@ -9,6 +9,6 @@ KMACHINE_genericx86-64 ?= "common-pc-64"
 COMPATIBLE_MACHINE_genericx86 = "genericx86"
 COMPATIBLE_MACHINE_genericx86-64 = "genericx86-64"
 
-SRC_URI += "file://iwlwifi.cfg"
+SRC_URI += "file://custom.cfg"
 
 KERNEL_MODULE_AUTOLOAD += "iwlwifi"
