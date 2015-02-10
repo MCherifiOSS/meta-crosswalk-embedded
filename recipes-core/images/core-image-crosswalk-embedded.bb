@@ -4,15 +4,6 @@ LICENSE = "BSD"
 
 IMAGE_FEATURES += "ssh-server-dropbear hwcodecs"
 
-CROSSWALK_EXAMPLES = "\
-    crosswalk-example \
-    emberwind \
-    hexgl \
-    jquerymobile-demos \
-    webgl-motion-detector \
-    webrtc \
-    "
-
 IMAGE_INSTALL = "\
     packagegroup-core-boot \
     connman \
