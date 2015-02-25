@@ -20,6 +20,7 @@ Wearables, Digital Signage** or any other embedded use case.
   - [Design](#design) - the architecture behind
   - [Howto](#howto) - set up the system environment, build and run
   - [Bugs](#bugs) - what's not working that we need still to catch up and improve
+  - [Customizing](#customizing) - boot up your own Web app and other hacking
   - [Contributing](#contributing) - help develop and send patches
   - [License](#license)
 
@@ -145,6 +146,36 @@ What's not working:
 
   * Sound
   * Touchpad
+
+# Customizing
+
+The first customization that you may want to try is boot up your own Web app
+instead the example we provide -- note that Crosswalk is a runtime not a
+regular browser, so you won't get an URL bar to load anything you want.
+Let's say you want to make an image booting into "myapp", so first you need to
+install "myapp" and "crosswalk-service" into your image:
+
+  ```IMAGE_INSTALL_append = " crosswalk-service myapp"```
+
+Worth to mention that "crosswalk-service" is already included by default in the
+ECP distribution but "myapp" obviously not. You have two parameters then you
+may want to set in your Yocto's conf/local.conf. With CROSSWALK_SERVICE_PARAMS,
+one will able to point to the manifest of "myapp" in the filesystem (or to
+something online like http://example.com, but you need to make sure that
+network is up on boot time in this case). Example:
+
+  ```CROSSWALK_SERVICE_PARAMS = "/path/to/myapp/manifest.json"```
+
+or simply:
+
+  ```CROSSWALK_SERVICE_PARAMS = "http://example.com"```
+
+The other parameter is CROSSWALK_SERVICE_DEBUG. Set this to 1 and the image
+will boot into the shell, you can call xwalk-service executable manually after
+logging in. Example:
+
+  ```CROSSWALK_SERVICE_DEBUG = "1"```
+
 
 # Contributing
 
